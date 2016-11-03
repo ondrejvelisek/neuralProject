@@ -2,6 +2,7 @@ package cz.muni.fi.neural;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ondrej Velisek <ondrejvelisek@gmail.com>
@@ -44,9 +45,16 @@ public class Layer implements NeuralNetwork {
 
 	}
 
+	@Override
+	public void learn(Map<List<Double>, List<Double>> trainingSet) {
+		throw new UnsupportedOperationException();
+	}
+
 	public int getOutputSize() {
 		return neurons.size();
 	}
 
-
+	public List<Neuron> getNeurons() {
+		return neurons;
+	}
 }
