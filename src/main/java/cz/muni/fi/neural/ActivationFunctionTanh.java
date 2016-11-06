@@ -5,10 +5,11 @@ package cz.muni.fi.neural;
  */
 public class ActivationFunctionTanh implements ActivationFunction{
 
-    public double output(){
-        return 0.0;
+    public double computeOutput(double innerPotential){
+       return Math.tanh(innerPotential);
     }
-    public double derivationOutput(){
-        return 0.0;
+
+    public double derivationOutput(double y){
+        return (1 - y)*(1 + y);
     }
 }

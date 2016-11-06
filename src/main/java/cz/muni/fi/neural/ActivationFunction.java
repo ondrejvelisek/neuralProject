@@ -5,7 +5,7 @@ package cz.muni.fi.neural;
  */
 public interface ActivationFunction {
 
-    double output();
-    double derivationOutput();
+    double computeOutput(double innerPotential);
+    double derivationOutput(double y);
     //getRangeOfValues()
 }

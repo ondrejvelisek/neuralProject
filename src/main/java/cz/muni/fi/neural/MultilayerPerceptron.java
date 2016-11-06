@@ -26,7 +26,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 		List<Neuron> neurons = new ArrayList<>();
 		for (int i = 0; i < layerSize; i++) {
-			neurons.add(new TanhNeuron(prevLayerSize));
+			neurons.add(new Neuron(prevLayerSize));
 		}
 		return new Layer(neurons);
 	}
