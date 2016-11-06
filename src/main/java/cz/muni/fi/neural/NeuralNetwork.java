@@ -9,7 +9,7 @@ import java.util.Set;
  */
 public interface NeuralNetwork {
 
-	List<Double> compute(List<Double> input);
+	List<Double> computeOutput(List<Double> input);
 
 	void learn(Map<List<Double>, List<Double>> trainingSet);
 

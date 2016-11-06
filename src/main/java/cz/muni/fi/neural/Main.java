@@ -2,10 +2,8 @@ package cz.muni.fi.neural;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class Main {
 
@@ -20,7 +18,7 @@ public class Main {
         NeuralNetwork net = new MultilayerPerceptron(2, 16, 64, 16, 1);
 
         System.out.println("Computing sum of "+input0);
-        List<Double> output = net.compute(input0);
+        List<Double> output = net.computeOutput(input0);
 
         System.out.println(output);
 
@@ -69,13 +67,13 @@ public class Main {
 	    net.learn(trainingSet);
 
         System.out.println("Computing sum of "+input0);
-        System.out.println(net.compute(input0));
+        System.out.println(net.computeOutput(input0));
         System.out.println("Computing sum of "+input1);
-        System.out.println(net.compute(input1));
+        System.out.println(net.computeOutput(input1));
         System.out.println("Computing sum of "+input2);
-        System.out.println(net.compute(input2));
+        System.out.println(net.computeOutput(input2));
         System.out.println("Computing sum of "+input3);
-        System.out.println(net.compute(input3));
+        System.out.println(net.computeOutput(input3));
 
     }
 

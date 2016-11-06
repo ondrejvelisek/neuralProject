@@ -30,12 +30,12 @@ public class TanhNeuron extends Neuron {
 
 	}
 
-	public List<Double> compute(List<Double> inputs) {
+	public List<Double> computeOutput(List<Double> inputs) {
 		if (inputs.size() != weights.size()) {
 			throw new IllegalStateException();
 		}
-		double pot = getInnerPotential(inputs);
-		lastOutput = Math.tanh(pot);
+		double innerPotential = computeInnerPotential(inputs);
+		lastOutput = Math.tanh(innerPotential);
 		getDerivatedOutput(lastOutput);
 		return Collections.singletonList(lastOutput);
 	}
@@ -45,7 +45,7 @@ public class TanhNeuron extends Neuron {
 		throw new UnsupportedOperationException();
 	}
 
-	private double getInnerPotential(List<Double> inputs) {
+	private double computeInnerPotential(List<Double> inputs) {
 
 		double sum = 0;
 		for(int i = 0; i < inputs.size(); i++) {

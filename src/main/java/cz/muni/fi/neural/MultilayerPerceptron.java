@@ -3,7 +3,6 @@ package cz.muni.fi.neural;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Ondrej Velisek <ondrejvelisek@gmail.com>
@@ -13,38 +12,35 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	private List<Layer> layers;
 
 	public MultilayerPerceptron(int... neuronsInLayer) {
-		if (neuronsInLayer.length <= 1) {
-			throw new IllegalArgumentException("At least one layers have to be present in MPL. It means two numbers has to be provided.");
+		if (neuronsInLayer.length < 3) {
+			throw new IllegalArgumentException("At least one layers have to be present in MPL. It means 3 numbers has to be provided.");
 		}
 
 		layers = new ArrayList<>();
 		for (int i = 1; i < neuronsInLayer.length; i++) {
 			layers.add(constructLayer(neuronsInLayer[i-1], neuronsInLayer[i]));
 		}
-
 	}
 
-	private Layer constructLayer(int inputSize, int layerSize) {
+	private Layer constructLayer(int prevLayerSize, int layerSize) {
 
 		List<Neuron> neurons = new ArrayList<>();
 		for (int i = 0; i < layerSize; i++) {
-			neurons.add(new TanhNeuron(inputSize));
+			neurons.add(new TanhNeuron(prevLayerSize));
 		}
 		return new Layer(neurons);
 	}
 
-	public List<Double> compute(List<Double> inputs) {
+	public List<Double> computeOutput(List<Double> inputs) {
 		if (inputs.size() != getInputSize()) {
 			throw new IllegalArgumentException("inputs have to match inputSize of the network");
 		}
 
-		// Do not want to modify parameter of the method
-		List<Double> currentResult = new ArrayList<>(inputs);
+		List<Double> inputsForNextLayer = new ArrayList<>(inputs);
 		for (Layer layer : layers) {
-			currentResult = layer.compute(currentResult);
+			inputsForNextLayer = layer.computeOutput(inputsForNextLayer);
 		}
-		return currentResult;
-
+		return inputsForNextLayer;
 	}
 
 	public void learn(Map<List<Double>, List<Double>> trainingSet) {
@@ -68,7 +64,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 						List<Double> desireOutput = sample.getValue();
 
 						// we obtain last results in all neurons
-						compute(sampleInput);
+						computeOutput(sampleInput);
 						double oj = neuron.getLastDerivatedOutput();
 						double yi;
 						if (i == 0) {
@@ -119,6 +115,11 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			}
 		}
 
+
+	}
+
+
+	public void backPropagation(){
 
 	}
 

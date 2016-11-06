@@ -15,6 +15,7 @@ public class Layer implements NeuralNetwork {
 		if (neurons.isEmpty()) {
 			throw new IllegalArgumentException("Neurons are empty");
 		}
+
 		int previousSize = neurons.get(0).getInputSize();
 		for (Neuron neuron : neurons) {
 			if (neuron.getInputSize() != previousSize) {
@@ -26,17 +27,17 @@ public class Layer implements NeuralNetwork {
 		this.neurons = neurons;
 	}
 
-	public List<Double> compute(List<Double> inputs) {
+	public List<Double> computeOutput(List<Double> inputs) {
 		if (inputs.size() != getInputSize()) {
-			throw new IllegalArgumentException("Cannot compute different size of input");
+			throw new IllegalArgumentException("Cannot computeOutput different size of input");
 		}
 
-		List<Double> result = new ArrayList<>();
+		List<Double> neuronOutputs = new ArrayList<>();
 		for (Neuron neuron : neurons) {
-			result.add(neuron.compute(inputs).get(0));
+			neuronOutputs.add(neuron.computeOutput(inputs).get(0));
 		}
-		return result;
 
+		return neuronOutputs;
 	}
 
 	public int getInputSize() {
@@ -45,7 +46,6 @@ public class Layer implements NeuralNetwork {
 
 	}
 
-	@Override
 	public void learn(Map<List<Double>, List<Double>> trainingSet) {
 		throw new UnsupportedOperationException();
 	}
