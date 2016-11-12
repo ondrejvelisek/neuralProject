@@ -2,51 +2,20 @@ package cz.muni.fi.neural;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ondrej Velisek <ondrejvelisek@gmail.com>
  */
-public class Layer implements NeuralNetwork {
+public interface Layer {
 
-	private List<Neuron> neurons;
+	List<Double> computeOutput(List<Double> inputs);
 
-	public Layer(List<Neuron> neurons) {
-		if (neurons.isEmpty()) {
-			throw new IllegalArgumentException("Neurons are empty");
-		}
-		int previousSize = neurons.get(0).getInputSize();
-		for (Neuron neuron : neurons) {
-			if (neuron.getInputSize() != previousSize) {
-				throw new IllegalArgumentException("All neurons in one layer has to have same input size");
-			}
-			previousSize = neuron.getInputSize();
-		}
+	int getInputSize();
 
-		this.neurons = neurons;
-	}
+	int getOutputSize();
 
-	public List<Double> compute(List<Double> inputs) {
-		if (inputs.size() != getInputSize()) {
-			throw new IllegalArgumentException("Cannot compute different size of input");
-		}
+	List<Neuron> getNeurons();
 
-		List<Double> result = new ArrayList<>();
-		for (Neuron neuron : neurons) {
-			result.add(neuron.compute(inputs).get(0));
-		}
-		return result;
-
-	}
-
-	public int getInputSize() {
-
-		return neurons.get(0).getInputSize();
-
-	}
-
-	public int getOutputSize() {
-		return neurons.size();
-	}
-
-
+	int getNeuronPosition(Neuron neuron);
 }
