@@ -17,4 +17,6 @@ public interface NeuralNetwork {
 
 	int getOutputSize();
 
+	double error(Map<List<Double>, List<Double>> trainingSet);
+
 }

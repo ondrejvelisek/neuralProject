@@ -2,14 +2,14 @@ package cz.muni.fi.neural;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
 
         System.out.println("Creating network...");
-        NeuralNetwork net = new MultilayerPerceptron(2, 16, 64, 16, 1);
+        NeuralNetwork net = new MultilayerPerceptron(2, 8, 1);
 
         DataReader dataReader = new DataReader();
         ArrayList<ArrayList<Double>> matrix = null;
@@ -20,13 +20,24 @@ public class Main {
             e.printStackTrace();
         }
 
-        for(int i=0; i < matrix.size(); i++) {
-            System.out.print(i + " ");
-            for (int j = 0; j < matrix.get(i).size(); j++) {
-                System.out.print(matrix.get(i).get(j) + " ");
-            }
-            System.out.println();
-        }
+        // need to add random number otherwise map will 'melt' same rows. Create Object Inputs?
+		Random rand = new Random();
+		Map<List<Double>, List<Double>> trainingSet = new HashMap<>();
+		for (List<Double> row : matrix) {
+			trainingSet.put(Arrays.asList(row.get(0), row.get(1), rand.nextDouble()), Collections.singletonList(row.get(2)));
+		}
+
+		double error = net.error(trainingSet);
+		System.out.println(error);
+
+		System.out.println("trainingSet size: " + trainingSet.size());
+
+		net.learn(trainingSet);
+
+		System.out.println();
+		System.out.println(error - net.error(trainingSet));
+
+
     }
 
 }

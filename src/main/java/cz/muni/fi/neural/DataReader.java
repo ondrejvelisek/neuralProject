@@ -5,7 +5,6 @@ import au.com.bytecode.opencsv.CSVReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -26,6 +25,7 @@ public class DataReader {
         ArrayList<ArrayList<Double>> matrix = new ArrayList<ArrayList<Double>>();
         while ((nextLine = reader.readNext()) != null) {
             ArrayList<Double> exampleValues = new ArrayList<>();
+            boolean lineError = false;
             for(String value : nextLine){
                 double doubleValue;
                 try {
@@ -33,11 +33,14 @@ public class DataReader {
                 }
                 catch(NumberFormatException e)
                 {
+                    lineError = true;
                     break;
                 }
                 exampleValues.add(doubleValue);
             }
-            matrix.add(exampleValues);
+            if (!lineError) {
+                matrix.add(exampleValues);
+            }
         }
         return matrix;
     }

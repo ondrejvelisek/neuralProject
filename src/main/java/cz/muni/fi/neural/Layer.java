@@ -7,54 +7,15 @@ import java.util.Map;
 /**
  * @author Ondrej Velisek <ondrejvelisek@gmail.com>
  */
-public class Layer implements NeuralNetwork {
+public interface Layer {
 
-	private List<Neuron> neurons;
+	List<Double> computeOutput(List<Double> inputs);
 
-	public Layer(List<Neuron> neurons) {
-		if (neurons.isEmpty()) {
-			throw new IllegalArgumentException("Neurons are empty");
-		}
+	int getInputSize();
 
-		int previousSize = neurons.get(0).getInputSize();
-		for (Neuron neuron : neurons) {
-			if (neuron.getInputSize() != previousSize) {
-				throw new IllegalArgumentException("All neurons in one layer has to have same input size");
-			}
-			previousSize = neuron.getInputSize();
-		}
+	int getOutputSize();
 
-		this.neurons = neurons;
-	}
+	List<Neuron> getNeurons();
 
-	public List<Double> computeOutput(List<Double> inputs) {
-		if (inputs.size() != getInputSize()) {
-			throw new IllegalArgumentException("Cannot computeOutput different size of input");
-		}
-
-		List<Double> neuronOutputs = new ArrayList<>();
-		for (Neuron neuron : neurons) {
-			neuronOutputs.add(neuron.computeOutput(inputs).get(0));
-		}
-
-		return neuronOutputs;
-	}
-
-	public int getInputSize() {
-
-		return neurons.get(0).getInputSize();
-
-	}
-
-	public void learn(Map<List<Double>, List<Double>> trainingSet) {
-		throw new UnsupportedOperationException();
-	}
-
-	public int getOutputSize() {
-		return neurons.size();
-	}
-
-	public List<Neuron> getNeurons() {
-		return neurons;
-	}
+	int getNeuronPosition(Neuron neuron);
 }
