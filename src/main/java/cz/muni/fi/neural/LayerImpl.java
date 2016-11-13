@@ -11,6 +11,7 @@ public class LayerImpl implements Layer {
 
 	private List<Neuron> neurons;
 
+
 	public LayerImpl(List<Neuron> neurons) {
 		if (neurons.isEmpty()) {
 			throw new IllegalArgumentException("Neurons are empty");

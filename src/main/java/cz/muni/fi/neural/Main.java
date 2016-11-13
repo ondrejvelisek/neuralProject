@@ -1,12 +1,17 @@
 package cz.muni.fi.neural;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.*;
 import java.util.*;
 
 public class Main {
 
+
     public static void main(String[] args) throws IOException {
+
+
 
         DataReader dataReader = new DataReader();
         List<List<Double>> dataMatrix = null;
@@ -37,8 +42,6 @@ public class Main {
 
 		System.out.println();
 		System.out.println(error - net.error(trainingSet));
-
-
     }
 
 }
