@@ -1,18 +1,15 @@
 package cz.muni.fi.neural;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.*;
 import java.util.*;
+
+import static com.sun.activation.registries.LogSupport.log;
 
 public class Main {
 
 
-    public static void main(String[] args) throws IOException {
-
-
-
+    public static void main(String[] args){
+        ConfigReader  mlpConfig = ConfigReader.getInstance();
         DataReader dataReader = new DataReader();
         List<List<Double>> dataMatrix = null;
 
@@ -21,10 +18,21 @@ public class Main {
             dataMatrix = dataReader.csvToMatrix();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         System.out.println("Creating network...");
-        NeuralNetwork net = new MultilayerPerceptron(2, 8, 1);
+
+        List<Integer> layersStructure = new ArrayList<>();
+        int inputLayerSize = mlpConfig.getInputVectors().size();
+        int outputLayerSize = 1;
+
+        layersStructure.add(inputLayerSize);
+        layersStructure.addAll(mlpConfig.getMlpArchitecture());
+        layersStructure.add(outputLayerSize);
+
+        NeuralNetwork net = new MultilayerPerceptron(layersStructure);
 
         // need to add random number otherwise map will 'melt' same rows. Create Object Inputs?
 		Random rand = new Random();

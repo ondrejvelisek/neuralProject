@@ -1,9 +1,10 @@
 package cz.muni.fi.neural;
 
+import cz.muni.fi.neural.algorithms.ActivationFunction;
+import cz.muni.fi.neural.algorithms.ActivationFunctionTanh;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 /**

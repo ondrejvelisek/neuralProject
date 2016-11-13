@@ -9,22 +9,26 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	private List<Layer> layers;
 
-	public MultilayerPerceptron(int... neuronsInLayer) {
-		if (neuronsInLayer.length < 3) {
-			throw new IllegalArgumentException("At least one layers have to be present in MPL. It means 3 numbers has to be provided.");
+	public MultilayerPerceptron(List<Integer> layersStructure) {
+		int numOfLayers = layersStructure.size();
+		if (numOfLayers < 3) {
+			throw new IllegalArgumentException("At least one hidden layer have to be present in MPL.");
 		}
 
 		layers = new ArrayList<>();
-		for (int i = 1; i < neuronsInLayer.length; i++) {
-			layers.add(constructLayer(neuronsInLayer[i-1], neuronsInLayer[i]));
+		for (int i = 1; i < numOfLayers; i++) {
+			layers.add(constructLayer(layersStructure.get(i-1), layersStructure.get(i)));
 		}
 
-		log("--------------------");
-		log("Multilayer perceptron builded: ");
-		for (Layer layer : layers) {
-			log(layer.getNeurons().size());
+		if(ConfigReader.getInstance().initializationDebug()){
+			log("--------------------");
+			log("Multilayer perceptron builded: ");
+			for (int i = 1; i < layers.size(); i++) {
+				log(layers.get(i).getNeurons().size());
+			}
+			log("--------------------");
 		}
-		log("--------------------");
+
 	}
 
 	private Layer constructLayer(int prevLayerSize, int layerSize) {
