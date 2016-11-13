@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Simon on 06.11.2016.
@@ -20,11 +21,11 @@ public class DataReader {
         reader = new CSVReader(new FileReader(fileName));
     }
 
-    public ArrayList<ArrayList<Double>> csvToMatrix() throws IOException {
+    public List<List<Double>> csvToMatrix() throws IOException {
         String [] nextLine;
-        ArrayList<ArrayList<Double>> matrix = new ArrayList<ArrayList<Double>>();
+        List<List<Double>> matrix = new ArrayList<List<Double>>();
         while ((nextLine = reader.readNext()) != null) {
-            ArrayList<Double> exampleValues = new ArrayList<>();
+            List<Double> exampleValues = new ArrayList<>();
             boolean lineError = false;
             for(String value : nextLine){
                 double doubleValue;
