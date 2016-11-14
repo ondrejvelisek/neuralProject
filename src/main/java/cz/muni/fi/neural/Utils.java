@@ -27,11 +27,11 @@ public class Utils {
 		return map;
 	}
 
-	public static <X, Y, Z> List<Z> zipLists(List<X> keys, List<Y> values, BiFunction<X, Y, Z> funtion) {
+	public static <X, Y, Z> List<Z> zipLists(List<X> first, List<Y> second, BiFunction<X, Y, Z> funtion) {
 		List<Z> result = new ArrayList<>();
 
-		for (Map.Entry<X, Y> entry : mergeLists(keys, values).entrySet()) {
-			result.add(funtion.apply(entry.getKey(), entry.getValue()));
+		for (int i = 0; i < first.size(); i++) {
+			result.add(funtion.apply(first.get(i), second.get(i)));
 		}
 
 		return result;

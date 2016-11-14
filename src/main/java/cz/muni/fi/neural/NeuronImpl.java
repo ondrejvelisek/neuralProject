@@ -23,7 +23,7 @@ public class NeuronImpl implements Neuron {
 		Random r = new Random();
 		List<Double> list = new ArrayList<>();
 		for (int i = 0; i < inputSize; i++) {
-			list.add(-0.1 + 0.2 * r.nextDouble());
+			list.add(-0.001 + 0.002 * r.nextDouble());
 		}
 		return list;
 
