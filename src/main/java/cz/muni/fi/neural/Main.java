@@ -2,16 +2,23 @@ package cz.muni.fi.neural;
 
 import java.io.*;
 import java.util.*;
-
-import static com.sun.activation.registries.LogSupport.log;
+import java.util.logging.*;
 
 public class Main {
-
+    public static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public static void main(String[] args){
         ConfigReader  mlpConfig = ConfigReader.getInstance();
         DataReader dataReader = new DataReader();
         List<List<Double>> dataMatrix = null;
+
+        try {
+            LogManager.getLogManager().readConfiguration(new FileInputStream("src/main/resources/logger.properties"));
+            FileHandler logFile = new FileHandler("./debug.log");
+            Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).addHandler(logFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         try {
             dataReader.setFile("xor_dataset.csv");

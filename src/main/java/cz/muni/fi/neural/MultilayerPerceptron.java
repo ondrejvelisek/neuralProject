@@ -68,10 +68,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			}
 		}
 		miniLearn(t, miniBatch);
-
-
 	}
-
 
 	private void miniLearn(int time, Map<List<Double>, List<Double>> miniBatch) {
 

@@ -45,10 +45,4 @@ public class DataReader {
         }
         return matrix;
     }
-
-
-
-
-
-
 }
