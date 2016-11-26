@@ -1,11 +1,13 @@
 package cz.muni.fi.neural;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * @author Ondrej Velisek <ondrejvelisek@gmail.com>
  */
 public class MultilayerPerceptron implements NeuralNetwork {
+	public static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private List<Layer> layers;
 
@@ -21,12 +23,13 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		}
 
 		if(ConfigReader.getInstance().initializationDebug()){
-			log("--------------------");
-			log("Multilayer perceptron builded: ");
-			for (int i = 1; i < layers.size(); i++) {
-				log(layers.get(i).getNeurons().size());
+			logger.info("--------------------");
+			logger.info("Multilayer perceptron builded: ");
+			logger.info("Structure of MLP without input layer: ");
+			for (int i = 0; i < layers.size(); i++) {
+				logger.info(""+layers.get(i).getNeurons().size());
 			}
-			log("--------------------");
+			logger.info("--------------------");
 		}
 
 	}

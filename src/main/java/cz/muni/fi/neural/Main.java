@@ -28,8 +28,14 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        System.out.println("Creating network...");
+                for(int i=0; i < dataMatrix.size(); i++) {
+                        System.out.print(i + " ");
+                        for (int j = 0; j < dataMatrix.get(i).size(); j++) {
+                                System.out.print(dataMatrix.get(i).get(j) + " ");
+                            }
+                       System.out.println();
+                    }
+        //System.out.println("Creating network...");
 
         List<Integer> layersStructure = new ArrayList<>();
         int inputLayerSize = mlpConfig.getInputVectors().size();
@@ -48,15 +54,16 @@ public class Main {
 			trainingSet.put(Arrays.asList(row.get(0), row.get(1), rand.nextDouble()), Collections.singletonList(row.get(2)));
 		}
 
-		double error = net.error(trainingSet);
-		System.out.println(error);
+        logger.info("Error without training:");
+        double error = net.error(trainingSet);
+        logger.info(""+error);
 
 		System.out.println("trainingSet size: " + trainingSet.size());
 
 		net.learn(trainingSet);
 
-		System.out.println();
-		System.out.println(error - net.error(trainingSet));
+        logger.info("Error after training:");
+        logger.info(""+net.error(trainingSet));
     }
 
 }
