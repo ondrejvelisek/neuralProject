@@ -54,16 +54,16 @@ public class Main {
 			trainingSet.put(Arrays.asList(row.get(0), row.get(1), rand.nextDouble()), Collections.singletonList(row.get(2)));
 		}
 
-        logger.info("Error without training:");
-        double error = net.error(trainingSet);
-        logger.info(""+error);
+//        logger.info("Error without training:");
+//        double error = net.error(trainingSet);
+//        logger.info(""+error);
 
-		System.out.println("trainingSet size: " + trainingSet.size());
+//		System.out.println("trainingSet size: " + trainingSet.size());
 
 		net.learn(trainingSet);
 
-        logger.info("Error after training:");
-        logger.info(""+net.error(trainingSet));
+//        logger.info("Error after training:");
+//        logger.info(""+net.error(trainingSet));
     }
 
 }

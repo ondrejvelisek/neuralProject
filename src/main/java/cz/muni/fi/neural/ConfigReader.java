@@ -64,7 +64,17 @@ public class ConfigReader {
         return value;
     }
 
+    public int getBatchSize() throws NumberFormatException{
+        String prop = props.getProperty("batchSize");
+        Integer value = Integer.parseInt(prop);
+        return value;
+    }
+
     public boolean initializationDebug()throws NumberFormatException{
        return Boolean.parseBoolean(props.getProperty("initializationDebug"));
+    }
+
+    public boolean learningIterationsDebug()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("learningIterationsDebug"));
     }
 }

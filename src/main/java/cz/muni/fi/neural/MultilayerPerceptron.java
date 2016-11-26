@@ -57,20 +57,32 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	public void learn(Map<List<Double>, List<Double>> trainingSet) {
 
-		int miniBatchSize = 10;
+		ConfigReader  mlpConfig = ConfigReader.getInstance();
+		int miniBatchSize = mlpConfig.getBatchSize();
 		Map<List<Double>, List<Double>> miniBatch = new HashMap<>();
 		int t = 0;
-		for (Map.Entry<List<Double>, List<Double>> trainingSample : trainingSet.entrySet()) {
-			miniBatch.put(trainingSample.getKey(), trainingSample.getValue());
-			if (miniBatch.size() == miniBatchSize) {
+		if(mlpConfig.learningIterationsDebug()){
+			logger.info("-------------LEARNING-------------");
+			logger.info("Learning properties:");
+			logger.info("Mini batch size: " + miniBatchSize);
+			logger.info("----------------------------------");
+		}
+		for(int i = 0; i < 500; i++){
+			for (Map.Entry<List<Double>, List<Double>> trainingSample : trainingSet.entrySet()) {
+				miniBatch.put(trainingSample.getKey(), trainingSample.getValue());
+				if (miniBatch.size() == miniBatchSize) {
+					if(mlpConfig.learningIterationsDebug())
+						logger.info("Iteration: " + t);
 
-				miniLearn(t, miniBatch);
+					miniLearn(t, miniBatch); //toto nech vracia error
+					miniBatch.clear();
+					t++;
 
-				miniBatch.clear();
-				t++;
+					if(mlpConfig.learningIterationsDebug())
+						logger.info("------------------------");
+				}
 			}
 		}
-		miniLearn(t, miniBatch);
 	}
 
 	private void miniLearn(int time, Map<List<Double>, List<Double>> miniBatch) {
@@ -92,6 +104,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	private double learningRate(double time) {
 
 		return 0.05/(time/5+1);
+		//return 0.001;
 
 	}
 
@@ -129,11 +142,14 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 		Map<Neuron, List<Double>> gradient = new HashMap<>();
 
+		Double error = 0.0;
 		for (Map.Entry<List<Double>, List<Double>> trainingSample : trainingSet.entrySet()) {
 			List<Double> sampleInput = trainingSample.getKey();
 			List<Double> desireOutput = trainingSample.getValue();
 
 			Map<Neuron, Double> neuronOutputs = forwardpass(sampleInput);
+			Neuron outputNeuron = layers.get(layers.size()-1).getNeurons().get(0);
+			error += Math.pow(neuronOutputs.get(outputNeuron) - desireOutput.get(0), 2);
 
 			Map<Neuron, Double> neuronGradients = backpropagation(sampleInput, desireOutput, neuronOutputs);
 
@@ -172,7 +188,8 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			}
 
 		}
-
+		if(ConfigReader.getInstance().learningIterationsDebug())
+			logger.info("Error MSE:"+error / trainingSet.size());
 		return gradient;
 
 	}
