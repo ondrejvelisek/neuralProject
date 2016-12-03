@@ -28,15 +28,24 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-                for(int i=0; i < dataMatrix.size(); i++) {
-                        System.out.print(i + " ");
-                        for (int j = 0; j < dataMatrix.get(i).size(); j++) {
-                                System.out.print(dataMatrix.get(i).get(j) + " ");
-                            }
-                       System.out.println();
-                    }
-        //System.out.println("Creating network...");
 
+        dataMatrix = dataReader.normalize(dataMatrix);
+        Double[][] inputsMatrix = dataReader.getInputsMatrix(dataMatrix);
+        Double[] outputsVector = dataReader.getOutputVector(dataMatrix);
+//
+//                for(int i=0; i < inputsMatrix.length; i++) {
+//                        System.out.print(i + " ");
+//                        for (int j = 0; j < inputsMatrix[1].length; j++) {
+//                                System.out.print(inputsMatrix[i][j] + " ");
+//                            }
+//                      System.out.println();
+//                   }
+//        for(int i=0; i < outputsVector.length; i++) {
+//            System.out.print(i + " ");
+//            System.out.print(outputsVector[i] + " ");
+//
+//            System.out.println();
+//        }
         List<Integer> layersStructure = new ArrayList<>();
         int inputLayerSize = mlpConfig.getInputVectors().size();
         int outputLayerSize = 1;
@@ -47,23 +56,7 @@ public class Main {
 
         NeuralNetwork net = new MultilayerPerceptron(layersStructure);
 
-        // need to add random number otherwise map will 'melt' same rows. Create Object Inputs?
-		Random rand = new Random();
-		Map<List<Double>, List<Double>> trainingSet = new HashMap<>();
-		for (List<Double> row : dataMatrix) {
-			trainingSet.put(Arrays.asList(row.get(0), row.get(1), rand.nextDouble()), Collections.singletonList(row.get(2)));
-		}
-
-//        logger.info("Error without training:");
-//        double error = net.error(trainingSet);
-//        logger.info(""+error);
-
-//		System.out.println("trainingSet size: " + trainingSet.size());
-
-		net.learn(trainingSet);
-
-//        logger.info("Error after training:");
-//        logger.info(""+net.error(trainingSet));
+		net.learn(inputsMatrix, outputsVector);
     }
 
 }

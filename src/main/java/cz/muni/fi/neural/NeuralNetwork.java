@@ -11,7 +11,7 @@ public interface NeuralNetwork {
 
 	List<Double> computeOutput(List<Double> input);
 
-	void learn(Map<List<Double>, List<Double>> trainingSet);
+	void learn(Double[][]inputsMatrix, Double[] outputsVector);
 
 	int getInputSize();
 

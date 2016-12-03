@@ -6,11 +6,14 @@ import cz.muni.fi.neural.algorithms.ActivationFunctionTanh;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 /**
  * @author Ondrej Velisek <ondrejvelisek@gmail.com>
  */
 public class NeuronImpl implements Neuron {
+	public static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); //negetovat ho vsade
+
 
 	private List<Double> weights;
 	private ActivationFunction activationFunction;
@@ -31,20 +34,28 @@ public class NeuronImpl implements Neuron {
 	}
 
 	public double computeOutput(List<Double> inputs) {
-		if (inputs.size() < weights.size()) {
+		if (inputs.size() != weights.size()) {
 			throw new IllegalArgumentException();
 		}
+
 		double innerPotential = computeInnerPotential(inputs);
 		return activationFunction.computeOutput(innerPotential);
 	}
 
-	// TODO add bias
 	private double computeInnerPotential(List<Double> inputs) {
 
 		double sum = 0;
 		for(int i = 0; i < weights.size(); i++) {
+			if(ConfigReader.getInstance().neuronInputsDebug()){
+				logger.info(""+inputs.get(i));
+			}
 			sum += inputs.get(i) * weights.get(i);
 		}
+
+		if(ConfigReader.getInstance().neuronInputsDebug()){
+			logger.info("--------------------------");
+		}
+
 		return sum;
 
 	}

@@ -53,14 +53,14 @@ public class ConfigReader {
 
         List<Integer> inputVectors = new ArrayList<>();
             for (int i = 0; i < propValues.length; i++) {
-                inputVectors.add(Integer.parseInt(propValues[i]));
+                inputVectors.add(Integer.parseInt(propValues[i]) - 1);
             }
         return inputVectors;
     }
 
     public int getOutputVector() throws NumberFormatException{
         String prop = props.getProperty("outputVector");
-        Integer value = Integer.parseInt(prop);
+        Integer value = Integer.parseInt(prop) - 1;
         return value;
     }
 
@@ -77,4 +77,13 @@ public class ConfigReader {
     public boolean learningIterationsDebug()throws NumberFormatException{
         return Boolean.parseBoolean(props.getProperty("learningIterationsDebug"));
     }
+
+    public boolean neuronInputsDebug()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("neuronInputsDebug"));
+    }
+
+    public boolean outputsOfLearningDebug()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("outputsOfLearningDebug"));
+    }
+
 }

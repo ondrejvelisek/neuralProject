@@ -1,5 +1,6 @@
 package cz.muni.fi.neural;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -31,7 +32,6 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			}
 			logger.info("--------------------");
 		}
-
 	}
 
 	private Layer constructLayer(int prevLayerSize, int layerSize) {
@@ -49,18 +49,24 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		}
 
 		List<Double> inputsForNextLayer = new ArrayList<>(inputs);
+
 		for (Layer currentLayer : layers) {
 			inputsForNextLayer = currentLayer.computeOutput(inputsForNextLayer);
 		}
 		return inputsForNextLayer;
 	}
 
-	public void learn(Map<List<Double>, List<Double>> trainingSet) {
+	public void learn(Double[][] inputsMatrix, Double[] outputsVector) {
+		int trainingSetSize = outputsVector.length;
 
 		ConfigReader  mlpConfig = ConfigReader.getInstance();
 		int miniBatchSize = mlpConfig.getBatchSize();
-		Map<List<Double>, List<Double>> miniBatch = new HashMap<>();
+
+		Double[][] miniBatchInputs = new Double[miniBatchSize][inputsMatrix[0].length];
+		Double[] miniBatchOutputs = new Double[miniBatchSize];
+
 		int t = 0;
+		int currentSize = 0;
 		if(mlpConfig.learningIterationsDebug()){
 			logger.info("-------------LEARNING-------------");
 			logger.info("Learning properties:");
@@ -68,14 +74,19 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			logger.info("----------------------------------");
 		}
 		for(int i = 0; i < 500; i++){
-			for (Map.Entry<List<Double>, List<Double>> trainingSample : trainingSet.entrySet()) {
-				miniBatch.put(trainingSample.getKey(), trainingSample.getValue());
-				if (miniBatch.size() == miniBatchSize) {
+			for (int j = 0; j < trainingSetSize; j++) {
+				miniBatchInputs[currentSize] = inputsMatrix[j];
+				miniBatchOutputs[currentSize] = outputsVector[j];
+				currentSize++;
+				if (currentSize == miniBatchSize) {
 					if(mlpConfig.learningIterationsDebug())
 						logger.info("Iteration: " + t);
 
-					miniLearn(t, miniBatch); //toto nech vracia error
-					miniBatch.clear();
+					miniLearn(t, miniBatchInputs, miniBatchOutputs);
+
+					miniBatchInputs = new Double[miniBatchSize][inputsMatrix[0].length];
+					miniBatchOutputs = new Double[miniBatchSize];
+					currentSize = 0;
 					t++;
 
 					if(mlpConfig.learningIterationsDebug())
@@ -85,9 +96,9 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		}
 	}
 
-	private void miniLearn(int time, Map<List<Double>, List<Double>> miniBatch) {
+	private void miniLearn(int time, Double[][] miniBatchInputs, Double[] miniBatchOutputs) {
 
-		Map<Neuron, List<Double>> miniGradient = computeGradient(miniBatch);
+		Map<Neuron, List<Double>> miniGradient = computeGradient(miniBatchInputs,miniBatchOutputs);
 
 		for (Map.Entry<Neuron, List<Double>> entry : miniGradient.entrySet()) {
 			Neuron neuron = entry.getKey();
@@ -103,11 +114,10 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	private double learningRate(double time) {
 
-		return 0.05/(time/5+1);
-		//return 0.001;
+		//return 0.05/(time/5+1);
+		return 0.3;
 
 	}
-
 
 	public double error(Map<List<Double>, List<Double>> trainingSet) {
 
@@ -135,40 +145,48 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	/**
 	 * Computes gradient for each weight
 	 *
-	 * @param trainingSet
 	 * @return
 	 */
-	private Map<Neuron, List<Double>> computeGradient(Map<List<Double>, List<Double>> trainingSet) {
+	private Map<Neuron, List<Double>> computeGradient(Double[][] inputs, Double[] outputs) {
+		int trainingSetSize = outputs.length;
 
 		Map<Neuron, List<Double>> gradient = new HashMap<>();
 
 		Double error = 0.0;
-		for (Map.Entry<List<Double>, List<Double>> trainingSample : trainingSet.entrySet()) {
-			List<Double> sampleInput = trainingSample.getKey();
-			List<Double> desireOutput = trainingSample.getValue();
+		for (int i = 0; i < trainingSetSize; i++){
+			List<Double> sampleInput = new ArrayList<Double>(Arrays.asList(inputs[i]));
+			List<Double> desireOutput = new ArrayList<Double>(Arrays.asList(outputs[i]));
 
-			Map<Neuron, Double> neuronOutputs = forwardpass(sampleInput);
+			Map<Neuron, Double> neuronOutputs = forwardPass(sampleInput);
+
 			Neuron outputNeuron = layers.get(layers.size()-1).getNeurons().get(0);
-			error += Math.pow(neuronOutputs.get(outputNeuron) - desireOutput.get(0), 2);
+			List<Double> sampleOutput = new ArrayList<Double>(Arrays.asList(neuronOutputs.get(outputNeuron)));
 
-			Map<Neuron, Double> neuronGradients = backpropagation(sampleInput, desireOutput, neuronOutputs);
+			if(ConfigReader.getInstance().outputsOfLearningDebug()) {
+				logger.info("output: " + new DecimalFormat("#0.00").format(sampleOutput.get(0)));
+				logger.info("desire: " + desireOutput.get(0));
+			}
+
+			error += Math.pow(sampleOutput.get(0) - desireOutput.get(0), 2);
+
+			Map<Neuron, Double> neuronGradients = backpropagation(sampleOutput, desireOutput, neuronOutputs);
 
 
 			for (Layer layer : layers) {
 				Layer layerBelow = getLayerBelow(layer);
 
-				for (Neuron neuron : layer.getNeurons()) {
+				for (Neuron neuron : layer.getNeurons()) { //treba vynechat bias
 
 					gradient.putIfAbsent(neuron, Utils.listOfZeros(neuron.getInputSize()));
 
 					List<Double> weightGradientsPerNeuron = gradient.get(neuron);
-					for (int i = 0; i < neuron.getWeights().size(); i++) {
+					for (int j = 0; j < neuron.getWeights().size(); j++) {
 
 						double yBelow;
 						if (layerBelow == null) {
-							yBelow = sampleInput.get(i);
+							yBelow = sampleInput.get(j);
 						} else {
-							Neuron neuronBelow = layerBelow.getNeurons().get(i);
+							Neuron neuronBelow = layerBelow.getNeurons().get(j);
 							yBelow = neuronOutputs.get(neuronBelow);
 						}
 
@@ -178,21 +196,19 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 						double weightGradient = g * d * yBelow;
 
-						weightGradientsPerNeuron.set(i, weightGradientsPerNeuron.get(i) + weightGradient);
+						weightGradientsPerNeuron.set(j, weightGradientsPerNeuron.get(j) + weightGradient);
 
 					}
 					gradient.put(neuron, weightGradientsPerNeuron);
-
 				}
-
 			}
-
 		}
 		if(ConfigReader.getInstance().learningIterationsDebug())
-			logger.info("Error MSE:"+error / trainingSet.size());
+			logger.info("Error MSE:"+error / trainingSetSize);
 		return gradient;
 
 	}
+
 
 	/**
 	 * Compute output value for each neuron
@@ -200,14 +216,14 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	 * @param sampleInput
 	 * @return
 	 */
-	private Map<Neuron, Double> forwardpass(List<Double> sampleInput) {
+	private Map<Neuron, Double> forwardPass(List<Double> sampleInput) {
 
 		Map<Neuron, Double> neuronsOutputs = new HashMap<>();
 
 		List<Double> inputsForNextLayer = new ArrayList<>(sampleInput);
 
 		for (Layer currentLayer : layers) {
-			inputsForNextLayer = currentLayer.computeOutput(inputsForNextLayer);
+			inputsForNextLayer = currentLayer.computeOutput(inputsForNextLayer); //vracat aj s jednotkou biasu
 
 			neuronsOutputs.putAll(Utils.mergeLists(currentLayer.getNeurons(), inputsForNextLayer));
 		}
@@ -218,12 +234,10 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	/**
 	 * Compute gradient for each neuron
 	 *
-	 * @param sampleInput
 	 * @param desireOutput
 	 * @return
 	 */
-	private Map<Neuron, Double> backpropagation(List<Double> sampleInput, List<Double> desireOutput, Map<Neuron, Double> neuronOutputs) {
-		List<Double> sampleOutput = computeOutput(sampleInput);
+	private Map<Neuron, Double> backpropagation(List<Double>  sampleOutput, List<Double> desireOutput, Map<Neuron, Double> neuronOutputs) {
 
 		// Set of all unstructured neurons of network. Result of this function.
 		Map<Neuron, Double> neuronGradients = new HashMap<>();
@@ -251,14 +265,12 @@ public class MultilayerPerceptron implements NeuralNetwork {
 					double g = neuronGradients.get(neuronAbove);
 					// sum partial results
 					neuronGradients.put(neuron, neuronGradients.get(neuron) + g*d*w);
-
 				}
 			}
 		}
-
 		return neuronGradients;
-
 	}
+
 
 
 	private Layer getLayerBelow(Layer layer) {
@@ -291,12 +303,5 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	public int getOutputSize() {
 		return layers.get(layers.size() - 1).getOutputSize();
-	}
-
-
-
-
-	private void log(Object msg) {
-		System.out.println(msg);
 	}
 }

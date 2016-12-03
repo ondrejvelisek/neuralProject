@@ -29,14 +29,14 @@ public class LayerImpl implements Layer {
 	}
 
 	public List<Double> computeOutput(List<Double> inputs) {
-		if (inputs.size() < getInputSize()) {
+		if (inputs.size() != getInputSize()) {
 			throw new IllegalArgumentException("Cannot computeOutput different size of input");
 		}
-
 		List<Double> neuronOutputs = new ArrayList<>();
 		for (Neuron neuron : neurons) {
 			neuronOutputs.add(neuron.computeOutput(inputs));
 		}
+		//tuna pridat ten bias
 
 		return neuronOutputs;
 	}
