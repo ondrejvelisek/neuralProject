@@ -14,13 +14,18 @@ import java.util.logging.Logger;
 public class NeuronImpl implements Neuron {
 	public static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); //negetovat ho vsade
 
-
+	private boolean biasNeuron;
 	private List<Double> weights;
 	private ActivationFunction activationFunction;
 
 	public NeuronImpl(int inputSize) {
 		this.weights = generateWeights(inputSize);
 		activationFunction = new ActivationFunctionTanh();
+		this.biasNeuron = false;
+	}
+
+	public NeuronImpl() {
+		this.biasNeuron = true;
 	}
 
 	private List<Double> generateWeights(int inputSize) {
@@ -61,6 +66,9 @@ public class NeuronImpl implements Neuron {
 	}
 
 	public int getInputSize() {
+		if(weights == null)
+			return 0;
+
 		return weights.size();
 	}
 
@@ -75,6 +83,10 @@ public class NeuronImpl implements Neuron {
 	@Override
 	public void setWeights(List<Double> weights) {
 		this.weights = weights;
+	}
+
+	public boolean isBias(){
+		return biasNeuron;
 	}
 
 }

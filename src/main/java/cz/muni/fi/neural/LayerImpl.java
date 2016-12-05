@@ -18,11 +18,10 @@ public class LayerImpl implements Layer {
 		}
 
 		int previousSize = neurons.get(0).getInputSize();
-		for (Neuron neuron : neurons) {
-			if (neuron.getInputSize() != previousSize) {
-				throw new IllegalArgumentException("All neurons in one layer has to have same input size");
+		for (int i = 0; i < neurons.size() - 1; i++) {
+			if (neurons.get(i).getInputSize() != previousSize) {
+				throw new IllegalArgumentException("All neurons in one layer has to have same input size except bias neuron");
 			}
-			previousSize = neuron.getInputSize();
 		}
 
 		this.neurons = neurons;
@@ -34,10 +33,13 @@ public class LayerImpl implements Layer {
 		}
 		List<Double> neuronOutputs = new ArrayList<>();
 		for (Neuron neuron : neurons) {
-			neuronOutputs.add(neuron.computeOutput(inputs));
+			if(neuron.isBias()){
+				neuronOutputs.add(1.0);
+			}
+			else{
+				neuronOutputs.add(neuron.computeOutput(inputs));
+			}
 		}
-		//tuna pridat ten bias
-
 		return neuronOutputs;
 	}
 

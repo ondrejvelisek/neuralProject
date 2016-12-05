@@ -21,4 +21,6 @@ public interface Neuron {
 
 	int getInputSize();
 
+	boolean isBias();
+
 }

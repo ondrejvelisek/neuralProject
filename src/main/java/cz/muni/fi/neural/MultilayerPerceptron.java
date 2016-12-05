@@ -19,22 +19,39 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		}
 
 		layers = new ArrayList<>();
-		for (int i = 1; i < numOfLayers; i++) {
-			layers.add(constructLayer(layersStructure.get(i-1), layersStructure.get(i)));
+		for (int i = 1; i < numOfLayers - 1; i++) {
+			int neuronsInLayer = layersStructure.get(i) + 1;
+			int neuronsInPrevLayer = layersStructure.get(i-1) + 1;
+			layers.add(constructLayer(neuronsInPrevLayer, neuronsInLayer));
 		}
+		int neuronsInOutputLayer = layersStructure.get(numOfLayers - 1);
+		int neuronsInPrevLayer = layersStructure.get(numOfLayers - 2) + 1;
+		layers.add(constructOutputLayer(neuronsInPrevLayer, neuronsInOutputLayer));
+
 
 		if(ConfigReader.getInstance().initializationDebug()){
 			logger.info("--------------------");
 			logger.info("Multilayer perceptron builded: ");
-			logger.info("Structure of MLP without input layer: ");
+			logger.info("Structure of MLP with bias neurons and without input layer: ");
 			for (int i = 0; i < layers.size(); i++) {
-				logger.info(""+layers.get(i).getNeurons().size());
+				logger.info(""+(layers.get(i).getNeurons().size()));
 			}
 			logger.info("--------------------");
 		}
 	}
 
 	private Layer constructLayer(int prevLayerSize, int layerSize) {
+
+		List<Neuron> neurons = new ArrayList<>();
+
+		for (int i = 0; i < layerSize - 1; i++) {
+			neurons.add(new NeuronImpl(prevLayerSize));
+		}
+		neurons.add(new NeuronImpl()); //Bias neuron
+		return new LayerImpl(neurons);
+	}
+
+	private Layer constructOutputLayer(int prevLayerSize, int layerSize) {
 
 		List<Neuron> neurons = new ArrayList<>();
 		for (int i = 0; i < layerSize; i++) {
@@ -176,6 +193,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 				Layer layerBelow = getLayerBelow(layer);
 
 				for (Neuron neuron : layer.getNeurons()) { //treba vynechat bias
+					if(neuron.isBias()) continue;
 
 					gradient.putIfAbsent(neuron, Utils.listOfZeros(neuron.getInputSize()));
 
@@ -223,7 +241,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		List<Double> inputsForNextLayer = new ArrayList<>(sampleInput);
 
 		for (Layer currentLayer : layers) {
-			inputsForNextLayer = currentLayer.computeOutput(inputsForNextLayer); //vracat aj s jednotkou biasu
+			inputsForNextLayer = currentLayer.computeOutput(inputsForNextLayer);
 
 			neuronsOutputs.putAll(Utils.mergeLists(currentLayer.getNeurons(), inputsForNextLayer));
 		}
@@ -253,11 +271,12 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			}
 
 			Layer layerAbove = getLayerAbove(layer);
-
+			//List<Neuron> neuronsOfLayer = layer.getNeurons();
 			for (Neuron neuron : layer.getNeurons()) {
 
 				neuronGradients.put(neuron, 0.0);
 				for (Neuron neuronAbove : layerAbove.getNeurons()) {
+					if(neuronAbove.isBias()) continue;
 
 					double y = neuronOutputs.get(neuronAbove);
 					double d = neuronAbove.derivationOutput(y);

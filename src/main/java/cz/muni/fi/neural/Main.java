@@ -30,9 +30,9 @@ public class Main {
         }
 
         dataMatrix = dataReader.normalize(dataMatrix);
-        Double[][] inputsMatrix = dataReader.getInputsMatrix(dataMatrix);
+        Double[][] inputsMatrix = dataReader.getInputsMatrixWithBiasInput(dataMatrix);
         Double[] outputsVector = dataReader.getOutputVector(dataMatrix);
-//
+
 //                for(int i=0; i < inputsMatrix.length; i++) {
 //                        System.out.print(i + " ");
 //                        for (int j = 0; j < inputsMatrix[1].length; j++) {

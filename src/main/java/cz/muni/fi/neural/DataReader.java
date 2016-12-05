@@ -81,19 +81,22 @@ public class DataReader {
         return matrix;
     }
 
-    //getInputsMatrixWithBiasInput
-
-    public Double[][] getInputsMatrix(List<List<Double>> dataMatrix){
+    public Double[][] getInputsMatrixWithBiasInput(List<List<Double>> dataMatrix){
         ConfigReader  mlpConfig = ConfigReader.getInstance();
 
-        int numberOfInptutVaribles = mlpConfig.getInputVectors().size();
-        Double[][] inputsMatrix = new Double[dataMatrix.size()][numberOfInptutVaribles];
+        int numberOfInputVariables = mlpConfig.getInputVectors().size();
+        Double[][] inputsMatrix = new Double[dataMatrix.size()][numberOfInputVariables + 1];
+
         int i = 0;
+        int k = 0;
         List<Integer> inputVectorsIndices = mlpConfig.getInputVectors();
         for (List<Double> row : dataMatrix) {
+            k = 0;
             for(int j : inputVectorsIndices){
-                inputsMatrix[i][j] = row.get(j);
+                inputsMatrix[i][k] = row.get(j);
+                k++;
             }
+            inputsMatrix[i][k] = 1.0;
             i++;
         }
         return inputsMatrix;
