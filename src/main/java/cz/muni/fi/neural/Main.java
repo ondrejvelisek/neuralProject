@@ -56,7 +56,8 @@ public class Main {
 
         NeuralNetwork net = new MultilayerPerceptron(layersStructure);
 
-		net.learn(inputsMatrix, outputsVector);
+        net.learn(inputsMatrix, outputsVector);
+
     }
 
 }

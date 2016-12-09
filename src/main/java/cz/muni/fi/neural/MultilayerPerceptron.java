@@ -90,7 +90,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			logger.info("Mini batch size: " + miniBatchSize);
 			logger.info("----------------------------------");
 		}
-		for(int i = 0; i < 500; i++){
+		for(int i = 0; i < 50; i++){
 			for (int j = 0; j < trainingSetSize; j++) {
 				miniBatchInputs[currentSize] = inputsMatrix[j];
 				miniBatchOutputs[currentSize] = outputsVector[j];
@@ -132,7 +132,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	private double learningRate(double time) {
 
 		//return 0.05/(time/5+1);
-		return 0.3;
+		return 0.1;
 
 	}
 
@@ -154,7 +154,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 		}
 
-		return error/2;
+		return error;
 
 	}
 
@@ -180,8 +180,11 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			List<Double> sampleOutput = new ArrayList<Double>(Arrays.asList(neuronOutputs.get(outputNeuron)));
 
 			if(ConfigReader.getInstance().outputsOfLearningDebug()) {
-				logger.info("output: " + new DecimalFormat("#0.00").format(sampleOutput.get(0)));
-				logger.info("desire: " + desireOutput.get(0));
+				//logger.info("input: " + sampleInput);
+				//logger.info("output: " + new DecimalFormat("#0.00").format(sampleOutput.get(0)));
+				//logger.info("output: " + sampleOutput.get(0));
+
+				//logger.info("desire: " + desireOutput.get(0));
 			}
 
 			error += Math.pow(sampleOutput.get(0) - desireOutput.get(0), 2);
@@ -192,7 +195,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			for (Layer layer : layers) {
 				Layer layerBelow = getLayerBelow(layer);
 
-				for (Neuron neuron : layer.getNeurons()) { //treba vynechat bias
+				for (Neuron neuron : layer.getNeurons()) {
 					if(neuron.isBias()) continue;
 
 					gradient.putIfAbsent(neuron, Utils.listOfZeros(neuron.getInputSize()));
@@ -271,7 +274,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			}
 
 			Layer layerAbove = getLayerAbove(layer);
-			//List<Neuron> neuronsOfLayer = layer.getNeurons();
+
 			for (Neuron neuron : layer.getNeurons()) {
 
 				neuronGradients.put(neuron, 0.0);
