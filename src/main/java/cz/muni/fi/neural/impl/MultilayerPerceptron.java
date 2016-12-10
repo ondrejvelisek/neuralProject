@@ -1,8 +1,13 @@
-package cz.muni.fi.neural;
+package cz.muni.fi.neural.impl;
 
-import java.text.DecimalFormat;
+import cz.muni.fi.neural.ConfigReader;
+import cz.muni.fi.neural.lib.*;
+import cz.muni.fi.neural.Utils;
+
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author Ondrej Velisek <ondrejvelisek@gmail.com>
@@ -12,7 +17,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	private List<Layer> layers;
 
-	public MultilayerPerceptron(List<Integer> layersStructure) {
+	public MultilayerPerceptron(List<Integer> layersStructure, ActivationFunction ac, WeightsInitAlgorithm wia) {
 		int numOfLayers = layersStructure.size();
 		if (numOfLayers < 3) {
 			throw new IllegalArgumentException("At least one hidden layer have to be present in MPL.");
@@ -22,11 +27,11 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		for (int i = 1; i < numOfLayers - 1; i++) {
 			int neuronsInLayer = layersStructure.get(i) + 1;
 			int neuronsInPrevLayer = layersStructure.get(i-1) + 1;
-			layers.add(constructLayer(neuronsInPrevLayer, neuronsInLayer));
+			layers.add(constructLayer(neuronsInPrevLayer, neuronsInLayer, ac, wia));
 		}
 		int neuronsInOutputLayer = layersStructure.get(numOfLayers - 1);
 		int neuronsInPrevLayer = layersStructure.get(numOfLayers - 2) + 1;
-		layers.add(constructOutputLayer(neuronsInPrevLayer, neuronsInOutputLayer));
+		layers.add(constructOutputLayer(neuronsInPrevLayer, neuronsInOutputLayer, ac, wia));
 
 
 		if(ConfigReader.getInstance().initializationDebug()){
@@ -40,22 +45,22 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		}
 	}
 
-	private Layer constructLayer(int prevLayerSize, int layerSize) {
+	private Layer constructLayer(int prevLayerSize, int layerSize, ActivationFunction ac, WeightsInitAlgorithm wia) {
 
 		List<Neuron> neurons = new ArrayList<>();
 
 		for (int i = 0; i < layerSize - 1; i++) {
-			neurons.add(new NeuronImpl(prevLayerSize));
+			neurons.add(new NeuronImpl(prevLayerSize, ac, wia));
 		}
-		neurons.add(new NeuronImpl()); //Bias neuron
+		neurons.add(new NeuronBias()); //Bias neuron
 		return new LayerImpl(neurons);
 	}
 
-	private Layer constructOutputLayer(int prevLayerSize, int layerSize) {
+	private Layer constructOutputLayer(int prevLayerSize, int layerSize, ActivationFunction ac, WeightsInitAlgorithm wia) {
 
 		List<Neuron> neurons = new ArrayList<>();
 		for (int i = 0; i < layerSize; i++) {
-			neurons.add(new NeuronImpl(prevLayerSize));
+			neurons.add(new NeuronImpl(prevLayerSize, ac, wia));
 		}
 		return new LayerImpl(neurons);
 	}
@@ -120,11 +125,16 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		for (Map.Entry<Neuron, List<Double>> entry : miniGradient.entrySet()) {
 			Neuron neuron = entry.getKey();
 			List<Double> gradientWeights = entry.getValue();
-			List<Double> oldWeights = neuron.getWeights();
+			List<Double> oldWeights = neuron.getWeights().stream()
+					.map(weight -> (weight.getValue()))
+					.collect(Collectors.toList());
 
-			List<Double> newWeights = Utils.zipLists(oldWeights, gradientWeights, (old, gradient) -> old-learningRate(time)*gradient);
+			List<Double> newWeights = IntStream.range(0, oldWeights.size())
+					.mapToDouble(i -> oldWeights.get(i) - learningRate(time)*gradientWeights.get(i))
+					.boxed()
+					.collect(Collectors.toList());
 
-			neuron.setWeights(newWeights);
+			neuron.updateWeights(newWeights);
 		}
 
 	}
@@ -136,25 +146,24 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	}
 
-	public double error(Map<List<Double>, List<Double>> trainingSet) {
+	@Override
+	public double error(Double[][] input, Double[] output) {
 
 		double error = 0;
 
-		for (Map.Entry<List<Double>, List<Double>> trainingSample : trainingSet.entrySet()) {
-			List<Double> sampleInput = trainingSample.getKey();
-			List<Double> desireOutput = trainingSample.getValue();
+		for (int i = 0; i < input.length; i++) {
+			Double[] sampleInput = input[i];
+			Double desireOutput = output[i];
 
-			List<Double> sampleOutput = computeOutput(sampleInput);
+			List<Double> sampleOutput = computeOutput(Arrays.asList(sampleInput));
 
-			List<Double> errorPerOutputs = Utils.zipLists(sampleOutput, desireOutput, (sample, desire) -> Math.pow(sample - desire, 2));
+			Double errorPerOutput = Math.pow(sampleOutput.get(0) - desireOutput, 2);
 
-			for (double errorPerOutput : errorPerOutputs) {
-				error += errorPerOutput;
-			}
+			error += errorPerOutput;
 
 		}
 
-		return error;
+		return error/input.length;
 
 	}
 
@@ -196,7 +205,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 				Layer layerBelow = getLayerBelow(layer);
 
 				for (Neuron neuron : layer.getNeurons()) {
-					if(neuron.isBias()) continue;
+					if (neuron instanceof NeuronBias) continue;
 
 					gradient.putIfAbsent(neuron, Utils.listOfZeros(neuron.getInputSize()));
 
@@ -279,11 +288,11 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 				neuronGradients.put(neuron, 0.0);
 				for (Neuron neuronAbove : layerAbove.getNeurons()) {
-					if(neuronAbove.isBias()) continue;
+					if (neuron instanceof NeuronBias) continue;
 
 					double y = neuronOutputs.get(neuronAbove);
 					double d = neuronAbove.derivationOutput(y);
-					double w = neuronAbove.getWeights().get(layer.getNeuronPosition(neuron));
+					double w = neuronAbove.getWeights().get(layer.getNeuronPosition(neuron)).getValue();
 					double g = neuronGradients.get(neuronAbove);
 					// sum partial results
 					neuronGradients.put(neuron, neuronGradients.get(neuron) + g*d*w);

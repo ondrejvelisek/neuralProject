@@ -1,8 +1,6 @@
-package cz.muni.fi.neural;
+package cz.muni.fi.neural.lib;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ondrej Velisek <ondrejvelisek@gmail.com>

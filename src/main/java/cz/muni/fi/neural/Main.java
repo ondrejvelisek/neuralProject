@@ -1,5 +1,12 @@
 package cz.muni.fi.neural;
 
+import cz.muni.fi.neural.impl.ActivationFunctionTanh;
+import cz.muni.fi.neural.impl.MultilayerPerceptron;
+import cz.muni.fi.neural.impl.WeightsInitAlgorithmRandom;
+import cz.muni.fi.neural.lib.ActivationFunction;
+import cz.muni.fi.neural.lib.NeuralNetwork;
+import cz.muni.fi.neural.lib.WeightsInitAlgorithm;
+
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
@@ -8,7 +15,7 @@ public class Main {
     public static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public static void main(String[] args){
-        ConfigReader  mlpConfig = ConfigReader.getInstance();
+        ConfigReader mlpConfig = ConfigReader.getInstance();
         DataReader dataReader = new DataReader();
         List<List<Double>> dataMatrix = null;
 
@@ -54,9 +61,32 @@ public class Main {
         layersStructure.addAll(mlpConfig.getMlpArchitecture());
         layersStructure.add(outputLayerSize);
 
-        NeuralNetwork net = new MultilayerPerceptron(layersStructure);
+        ActivationFunction ac = new ActivationFunctionTanh(1);
+        WeightsInitAlgorithm wia = new WeightsInitAlgorithmRandom(-0.3, 0.3);
 
-        net.learn(inputsMatrix, outputsVector);
+        int n = 100;
+        int correct = 0;
+        for (int i = 0; i < n; i++) {
+            System.out.print(".");
+        }
+        System.out.println();
+        for (int i = 0; i < n; i++) {
+
+            NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
+
+            double origErr = net.error(inputsMatrix, outputsVector);
+
+            net.learn(inputsMatrix, outputsVector);
+
+            if (net.error(inputsMatrix, outputsVector) < origErr/10) {
+                correct++;
+            }
+            System.out.print("|");
+        }
+        System.out.println();
+        System.out.println("Total experiments: " + n);
+        System.out.println("Successful experiments: " + correct);
+
 
     }
 

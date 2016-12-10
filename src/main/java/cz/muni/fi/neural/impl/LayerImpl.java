@@ -1,4 +1,7 @@
-package cz.muni.fi.neural;
+package cz.muni.fi.neural.impl;
+
+import cz.muni.fi.neural.lib.Layer;
+import cz.muni.fi.neural.lib.Neuron;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +36,7 @@ public class LayerImpl implements Layer {
 		}
 		List<Double> neuronOutputs = new ArrayList<>();
 		for (Neuron neuron : neurons) {
-			if(neuron.isBias()){
-				neuronOutputs.add(1.0);
-			}
-			else{
-				neuronOutputs.add(neuron.computeOutput(inputs));
-			}
+			neuronOutputs.add(neuron.computeOutput(inputs));
 		}
 		return neuronOutputs;
 	}
@@ -47,10 +45,6 @@ public class LayerImpl implements Layer {
 
 		return neurons.get(0).getInputSize();
 
-	}
-
-	public void learn(Map<List<Double>, List<Double>> trainingSet) {
-		throw new UnsupportedOperationException();
 	}
 
 	public int getOutputSize() {

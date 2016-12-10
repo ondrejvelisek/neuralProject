@@ -1,4 +1,4 @@
-package cz.muni.fi.neural.algorithms;
+package cz.muni.fi.neural.lib;
 
 /**
  * Created by Simon on 06.11.2016.
@@ -6,6 +6,7 @@ package cz.muni.fi.neural.algorithms;
 public interface ActivationFunction {
 
     double computeOutput(double innerPotential);
-    double derivationOutput(double y);
-    //getRangeOfValues()
+
+    double derivationOutput(double output);
+
 }

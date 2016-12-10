@@ -1,5 +1,7 @@
 package cz.muni.fi.neural;
 
+import cz.muni.fi.neural.lib.Weight;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,4 +49,9 @@ public class Utils {
 		return result;
 	}
 
+	public static void checkEqualSize(List<?> list1, List<?> list2) {
+		if (list1.size() != list2.size()) {
+			throw new IllegalArgumentException("Lists has to have equal size");
+		}
+	}
 }

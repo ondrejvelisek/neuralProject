@@ -1,4 +1,4 @@
-package cz.muni.fi.neural;
+package cz.muni.fi.neural.lib;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,14 +13,14 @@ public interface Neuron {
 
 	double computeOutput(List<Double> inputs);
 
-	double derivationOutput(double y);
+	double derivationOutput(double output);
 
-	List<Double> getWeights();
+	List<Weight> getWeights();
 
-	void setWeights(List<Double> weights);
+	List<Double> getWeightValues();
+
+	void updateWeights(List<Double> weights);
 
 	int getInputSize();
-
-	boolean isBias();
 
 }
