@@ -19,10 +19,12 @@ public class DataReader {
 
     }
     public void setFile(String fileName) throws FileNotFoundException {
-        reader = new CSVReader(new FileReader(fileName));
+        ConfigReader mlpConfig = ConfigReader.getInstance();
+        reader = new CSVReader(new FileReader(fileName),mlpConfig.getCsvSeparator());
     }
 
     public List<List<Double>> csvToMatrix() throws IOException {
+        ConfigReader mlpConfig = ConfigReader.getInstance();
         String [] nextLine;
         List<List<Double>> matrix = new ArrayList<List<Double>>();
         while ((nextLine = reader.readNext()) != null) {

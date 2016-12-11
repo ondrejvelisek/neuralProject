@@ -14,7 +14,7 @@ import java.util.logging.*;
 public class Main {
     public static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         ConfigReader mlpConfig = ConfigReader.getInstance();
         DataReader dataReader = new DataReader();
         List<List<Double>> dataMatrix = null;
@@ -28,7 +28,7 @@ public class Main {
         }
 
         try {
-            dataReader.setFile("xor_dataset.csv");
+            dataReader.setFile(mlpConfig.getDataSourceName());
             dataMatrix = dataReader.csvToMatrix();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -40,19 +40,22 @@ public class Main {
         Double[][] inputsMatrix = dataReader.getInputsMatrixWithBiasInput(dataMatrix);
         Double[] outputsVector = dataReader.getOutputVector(dataMatrix);
 
-//                for(int i=0; i < inputsMatrix.length; i++) {
-//                        System.out.print(i + " ");
-//                        for (int j = 0; j < inputsMatrix[1].length; j++) {
-//                                System.out.print(inputsMatrix[i][j] + " ");
-//                            }
-//                      System.out.println();
-//                   }
-//        for(int i=0; i < outputsVector.length; i++) {
-//            System.out.print(i + " ");
-//            System.out.print(outputsVector[i] + " ");
-//
-//            System.out.println();
-//        }
+        if(mlpConfig.loadedDatasetDebug()) {
+            for (int i = 0; i < inputsMatrix.length; i++) {
+                System.out.print(i + " ");
+                for (int j = 0; j < inputsMatrix[1].length; j++) {
+                    System.out.print(inputsMatrix[i][j] + " ");
+                }
+                System.out.println();
+            }
+            for (int i = 0; i < outputsVector.length; i++) {
+                System.out.print(i + " ");
+                System.out.print(outputsVector[i] + " ");
+
+                System.out.println();
+            }
+        }
+
         List<Integer> layersStructure = new ArrayList<>();
         int inputLayerSize = mlpConfig.getInputVectors().size();
         int outputLayerSize = 1;
@@ -70,24 +73,25 @@ public class Main {
             System.out.print(".");
         }
         System.out.println();
-        for (int i = 0; i < n; i++) {
+//        for (int i = 0; i < n; i++) {
+//
+//            NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
+//
+//            double origErr = net.error(inputsMatrix, outputsVector);
+//
+//            net.learn(inputsMatrix, outputsVector);
+//
+//            if (net.error(inputsMatrix, outputsVector) < origErr/10) {
+//                correct++;
+//            }
+//            System.out.print("|");
+//        }
+//        System.out.println();
+//        System.out.println("Total experiments: " + n);
+//        System.out.println("Successful experiments: " + correct);
 
-            NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
-
-            double origErr = net.error(inputsMatrix, outputsVector);
-
-            net.learn(inputsMatrix, outputsVector);
-
-            if (net.error(inputsMatrix, outputsVector) < origErr/10) {
-                correct++;
-            }
-            System.out.print("|");
-        }
-        System.out.println();
-        System.out.println("Total experiments: " + n);
-        System.out.println("Successful experiments: " + correct);
-
-
+         NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
+         net.learn(inputsMatrix, outputsVector);
     }
 
 }

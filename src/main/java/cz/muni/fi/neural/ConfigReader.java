@@ -69,6 +69,14 @@ public class ConfigReader {
         return value;
     }
 
+    public String getDataSourceName(){
+        return props.getProperty("dataSourceName");
+    }
+
+    public char getCsvSeparator(){
+        return props.getProperty("csvSeparator").charAt(0);
+    }
+
     public boolean initializationDebug()throws NumberFormatException{
        return Boolean.parseBoolean(props.getProperty("initializationDebug"));
     }
@@ -85,4 +93,7 @@ public class ConfigReader {
         return Boolean.parseBoolean(props.getProperty("outputsOfLearningDebug"));
     }
 
+    public boolean loadedDatasetDebug()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("loadedDatasetDebug"));
+    }
 }
