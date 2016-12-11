@@ -30,9 +30,7 @@ public class NeuronImpl implements Neuron {
 	}
 
 	public double computeOutput(List<Double> inputs) {
-		if (inputs.size() != weights.size()) {
-			throw new IllegalArgumentException();
-		}
+		Utils.checkEqualSize(this.weights, inputs);
 
 		double innerPotential = computeInnerPotential(inputs);
 		return activationFunction.computeOutput(innerPotential);
@@ -85,4 +83,10 @@ public class NeuronImpl implements Neuron {
 				.forEach(i -> this.weights.get(i).setValue(weights.get(i)));
 	}
 
+	@Override
+	public String toString() {
+		return "\n\tNeuron{" +
+				"weights=" + weights +
+				"}";
+	}
 }

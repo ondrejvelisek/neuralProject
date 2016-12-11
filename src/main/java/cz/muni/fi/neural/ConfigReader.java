@@ -46,21 +46,14 @@ public class ConfigReader {
         return mlpArchitecture;
     }
 
-    public List<Integer> getInputVectors() throws NumberFormatException{
-        String prop = props.getProperty("inputVectors");
-        String [] propValues = prop.split(",");
-
-        List<Integer> inputVectors = new ArrayList<>();
-            for (int i = 0; i < propValues.length; i++) {
-                inputVectors.add(Integer.parseInt(propValues[i]) - 1);
-            }
-        return inputVectors;
+    public int getInputSize() throws NumberFormatException{
+        String prop = props.getProperty("inputSize");
+        return Integer.parseInt(prop);
     }
 
-    public int getOutputVector() throws NumberFormatException{
-        String prop = props.getProperty("outputVector");
-        Integer value = Integer.parseInt(prop) - 1;
-        return value;
+    public int getOutputSize() throws NumberFormatException{
+        String prop = props.getProperty("outputSize");
+        return Integer.parseInt(prop);
     }
 
     public int getBatchSize() throws NumberFormatException{

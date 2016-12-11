@@ -1,5 +1,7 @@
 package cz.muni.fi.neural.lib;
 
+import cz.muni.fi.neural.impl.TrainingSample;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,12 +13,12 @@ public interface NeuralNetwork {
 
 	List<Double> computeOutput(List<Double> input);
 
-	void learn(Double[][]inputsMatrix, Double[] outputsVector);
+	void train(List<TrainingSample> trainingSet);
 
 	int getInputSize();
 
 	int getOutputSize();
 
-	double error(Double[][] inputVector, Double[] output);
+	double error(List<TrainingSample> trainingSet);
 
 }

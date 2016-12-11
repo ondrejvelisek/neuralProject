@@ -1,5 +1,6 @@
 package cz.muni.fi.neural.impl;
 
+import cz.muni.fi.neural.lib.Neuron;
 import cz.muni.fi.neural.lib.Weight;
 import cz.muni.fi.neural.lib.WeightsInitAlgorithm;
 
@@ -24,11 +25,11 @@ public class WeightsInitAlgorithmRandom implements WeightsInitAlgorithm {
 
 	@Override
 	public List<Weight> initWeights(int size) {
-		List<Weight> list = new ArrayList<>();
+		List<Weight> weights = new ArrayList<>();
 		for (int i = 0; i < size; i++) {
-			list.add(new WeightImpl(min + max * random.nextDouble()));
+			weights.add(new WeightImpl(min + max * random.nextDouble()));
 		}
-		return list;
+		return weights;
 	}
 
 }

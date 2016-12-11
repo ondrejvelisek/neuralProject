@@ -18,21 +18,14 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	private List<Layer> layers;
 
 	public MultilayerPerceptron(List<Integer> layersStructure, ActivationFunction ac, WeightsInitAlgorithm wia) {
-		int numOfLayers = layersStructure.size();
-		if (numOfLayers < 3) {
+		if (layersStructure.size() < 3) {
 			throw new IllegalArgumentException("At least one hidden layer have to be present in MPL.");
 		}
 
 		layers = new ArrayList<>();
-		for (int i = 1; i < numOfLayers - 1; i++) {
-			int neuronsInLayer = layersStructure.get(i) + 1;
-			int neuronsInPrevLayer = layersStructure.get(i-1) + 1;
-			layers.add(constructLayer(neuronsInPrevLayer, neuronsInLayer, ac, wia));
+		for (int i = 1; i < layersStructure.size(); i++) {
+			layers.add(new LayerImpl(layersStructure.get(i-1), layersStructure.get(i), ac, wia));
 		}
-		int neuronsInOutputLayer = layersStructure.get(numOfLayers - 1);
-		int neuronsInPrevLayer = layersStructure.get(numOfLayers - 2) + 1;
-		layers.add(constructOutputLayer(neuronsInPrevLayer, neuronsInOutputLayer, ac, wia));
-
 
 		if(ConfigReader.getInstance().initializationDebug()){
 			logger.info("--------------------");
@@ -45,30 +38,8 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		}
 	}
 
-	private Layer constructLayer(int prevLayerSize, int layerSize, ActivationFunction ac, WeightsInitAlgorithm wia) {
-
-		List<Neuron> neurons = new ArrayList<>();
-
-		for (int i = 0; i < layerSize - 1; i++) {
-			neurons.add(new NeuronImpl(prevLayerSize, ac, wia));
-		}
-		neurons.add(new NeuronBias()); //Bias neuron
-		return new LayerImpl(neurons);
-	}
-
-	private Layer constructOutputLayer(int prevLayerSize, int layerSize, ActivationFunction ac, WeightsInitAlgorithm wia) {
-
-		List<Neuron> neurons = new ArrayList<>();
-		for (int i = 0; i < layerSize; i++) {
-			neurons.add(new NeuronImpl(prevLayerSize, ac, wia));
-		}
-		return new LayerImpl(neurons);
-	}
-
 	public List<Double> computeOutput(List<Double> inputs) {
-		if (inputs.size() < getInputSize()) {
-			throw new IllegalArgumentException("inputs have to match inputSize of the network");
-		}
+		Utils.checkEqualSize(getInputSize(), inputs);
 
 		List<Double> inputsForNextLayer = new ArrayList<>(inputs);
 
@@ -78,17 +49,14 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		return inputsForNextLayer;
 	}
 
-	public void learn(Double[][] inputsMatrix, Double[] outputsVector) {
-		int trainingSetSize = outputsVector.length;
+	@Override
+	public void train(List<TrainingSample> trainingSet) {
 
 		ConfigReader  mlpConfig = ConfigReader.getInstance();
 		int miniBatchSize = mlpConfig.getBatchSize();
 
-		Double[][] miniBatchInputs = new Double[miniBatchSize][inputsMatrix[0].length];
-		Double[] miniBatchOutputs = new Double[miniBatchSize];
-
 		int t = 0;
-		int currentSize = 0;
+		List<TrainingSample> miniTrainingSet = new ArrayList<>();
 		if(mlpConfig.learningIterationsDebug()){
 			logger.info("-------------LEARNING-------------");
 			logger.info("Learning properties:");
@@ -96,19 +64,15 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			logger.info("----------------------------------");
 		}
 		for(int i = 0; i < 50; i++){
-			for (int j = 0; j < trainingSetSize; j++) {
-				miniBatchInputs[currentSize] = inputsMatrix[j];
-				miniBatchOutputs[currentSize] = outputsVector[j];
-				currentSize++;
-				if (currentSize == miniBatchSize) {
+			for (TrainingSample sample : trainingSet) {
+				miniTrainingSet.add(sample);
+				if (miniTrainingSet.size() == miniBatchSize) {
 					if(mlpConfig.learningIterationsDebug())
 						logger.info("Iteration: " + t);
 
-					miniLearn(t, miniBatchInputs, miniBatchOutputs);
+					miniTrain(t, miniTrainingSet);
 
-					miniBatchInputs = new Double[miniBatchSize][inputsMatrix[0].length];
-					miniBatchOutputs = new Double[miniBatchSize];
-					currentSize = 0;
+					miniTrainingSet.clear();
 					t++;
 
 					if(mlpConfig.learningIterationsDebug())
@@ -118,24 +82,11 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		}
 	}
 
-	private void miniLearn(int time, Double[][] miniBatchInputs, Double[] miniBatchOutputs) {
+	private void miniTrain(int time, List<TrainingSample> miniTrainingSet) {
 
-		Map<Neuron, List<Double>> miniGradient = computeGradient(miniBatchInputs,miniBatchOutputs);
+		Map<Weight, Double> miniGradient = computeGradient(miniTrainingSet);
 
-		for (Map.Entry<Neuron, List<Double>> entry : miniGradient.entrySet()) {
-			Neuron neuron = entry.getKey();
-			List<Double> gradientWeights = entry.getValue();
-			List<Double> oldWeights = neuron.getWeights().stream()
-					.map(weight -> (weight.getValue()))
-					.collect(Collectors.toList());
-
-			List<Double> newWeights = IntStream.range(0, oldWeights.size())
-					.mapToDouble(i -> oldWeights.get(i) - learningRate(time)*gradientWeights.get(i))
-					.boxed()
-					.collect(Collectors.toList());
-
-			neuron.updateWeights(newWeights);
-		}
+		miniGradient.entrySet().forEach(entry -> entry.getKey().setValue(entry.getKey().getValue() - learningRate(time) * entry.getValue()));
 
 	}
 
@@ -146,78 +97,52 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	}
 
-	@Override
-	public double error(Double[][] input, Double[] output) {
-
-		double error = 0;
-
-		for (int i = 0; i < input.length; i++) {
-			Double[] sampleInput = input[i];
-			Double desireOutput = output[i];
-
-			List<Double> sampleOutput = computeOutput(Arrays.asList(sampleInput));
-
-			Double errorPerOutput = Math.pow(sampleOutput.get(0) - desireOutput, 2);
-
-			error += errorPerOutput;
-
-		}
-
-		return error/input.length;
-
-	}
-
-
 	/**
 	 * Computes gradient for each weight
 	 *
 	 * @return
 	 */
-	private Map<Neuron, List<Double>> computeGradient(Double[][] inputs, Double[] outputs) {
-		int trainingSetSize = outputs.length;
+	private Map<Weight, Double> computeGradient(List<TrainingSample> trainingSet) {
 
-		Map<Neuron, List<Double>> gradient = new HashMap<>();
+		Map<Weight, Double> gradient = new HashMap<>();
 
-		Double error = 0.0;
-		for (int i = 0; i < trainingSetSize; i++){
-			List<Double> sampleInput = new ArrayList<Double>(Arrays.asList(inputs[i]));
-			List<Double> desireOutput = new ArrayList<Double>(Arrays.asList(outputs[i]));
+		for (TrainingSample sample : trainingSet){
 
-			Map<Neuron, Double> neuronOutputs = forwardPass(sampleInput);
+			Map<Neuron, Double> neuronOutputs = forwardPass(sample.getInput());
 
-			Neuron outputNeuron = layers.get(layers.size()-1).getNeurons().get(0);
-			List<Double> sampleOutput = new ArrayList<Double>(Arrays.asList(neuronOutputs.get(outputNeuron)));
+			//List<Neuron> outputNeurons = layers.get(layers.size()-1).getNeurons();
+			List<Double> sampleOutput = computeOutput(sample.getInput());
+
+			/*outputNeurons.stream()
+					.filter(neuronOutputs::containsKey)
+					.map(neuronOutputs::get)
+					.collect(Collectors.toList());
+			*/
 
 			if(ConfigReader.getInstance().outputsOfLearningDebug()) {
-				//logger.info("input: " + sampleInput);
-				//logger.info("output: " + new DecimalFormat("#0.00").format(sampleOutput.get(0)));
-				//logger.info("output: " + sampleOutput.get(0));
+				logger.info("input: " + sample.getInput());
+				logger.info("output: " + sampleOutput);
 
-				//logger.info("desire: " + desireOutput.get(0));
+				logger.info("desire: " + sample.getDesireOutput());
 			}
 
-			error += Math.pow(sampleOutput.get(0) - desireOutput.get(0), 2);
-
-			Map<Neuron, Double> neuronGradients = backpropagation(sampleOutput, desireOutput, neuronOutputs);
+			Map<Neuron, Double> neuronGradients = backpropagation(sampleOutput, sample.getDesireOutput(), neuronOutputs);
 
 
 			for (Layer layer : layers) {
-				Layer layerBelow = getLayerBelow(layer);
 
 				for (Neuron neuron : layer.getNeurons()) {
-					if (neuron instanceof NeuronBias) continue;
 
-					gradient.putIfAbsent(neuron, Utils.listOfZeros(neuron.getInputSize()));
-
-					List<Double> weightGradientsPerNeuron = gradient.get(neuron);
-					for (int j = 0; j < neuron.getWeights().size(); j++) {
+					for (int w = 0; w < neuron.getWeights().size(); w++) {
+						Weight weight = neuron.getWeights().get(w);
 
 						double yBelow;
-						if (layerBelow == null) {
-							yBelow = sampleInput.get(j);
+						if (w == neuron.getWeights().size()-1) {
+							yBelow = 1.0;
+						} else if (isFirstLayer(layer)) {
+							yBelow = sample.getInput().get(w);
 						} else {
-							Neuron neuronBelow = layerBelow.getNeurons().get(j);
-							yBelow = neuronOutputs.get(neuronBelow);
+							yBelow = neuronOutputs.get(getLayerBelow(layer).getNeurons().get(w));
 						}
 
 						double y = neuronOutputs.get(neuron);
@@ -226,15 +151,17 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 						double weightGradient = g * d * yBelow;
 
-						weightGradientsPerNeuron.set(j, weightGradientsPerNeuron.get(j) + weightGradient);
+						gradient.putIfAbsent(weight, 0.0);
+						gradient.put(weight, gradient.get(weight) + weightGradient);
 
 					}
-					gradient.put(neuron, weightGradientsPerNeuron);
 				}
 			}
 		}
-		if(ConfigReader.getInstance().learningIterationsDebug())
-			logger.info("Error MSE:"+error / trainingSetSize);
+		if(ConfigReader.getInstance().learningIterationsDebug()) {
+			logger.info("Error MSE:" + error(trainingSet));
+		}
+
 		return gradient;
 
 	}
@@ -288,7 +215,6 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 				neuronGradients.put(neuron, 0.0);
 				for (Neuron neuronAbove : layerAbove.getNeurons()) {
-					if (neuron instanceof NeuronBias) continue;
 
 					double y = neuronOutputs.get(neuronAbove);
 					double d = neuronAbove.derivationOutput(y);
@@ -302,6 +228,28 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		return neuronGradients;
 	}
 
+
+
+	@Override
+	public double error(List<TrainingSample> trainingSet) {
+
+		double error = 0;
+
+		for (TrainingSample sample : trainingSet) {
+
+			List<Double> sampleOutput = computeOutput(sample.getInput());
+
+			Double errorPerOutput = IntStream.range(0, sampleOutput.size())
+					.mapToDouble(i -> Math.pow(sampleOutput.get(i) - sample.getDesireOutput().get(i), 2))
+					.sum();
+
+			error += errorPerOutput;
+
+		}
+
+		return error/trainingSet.size();
+
+	}
 
 
 	private Layer getLayerBelow(Layer layer) {
@@ -326,6 +274,9 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		return (layer.equals(layers.get(layers.size() - 1)));
 	}
 
+	private boolean isFirstLayer(Layer layer) {
+		return (layer.equals(layers.get(0)));
+	}
 
 
 	public int getInputSize() {
@@ -334,5 +285,12 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	public int getOutputSize() {
 		return layers.get(layers.size() - 1).getOutputSize();
+	}
+
+	@Override
+	public String toString() {
+		return "MultilayerPerceptron{" +
+				"\nlayers=" + layers +
+				"\n}";
 	}
 }

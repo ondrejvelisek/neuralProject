@@ -1,5 +1,6 @@
 package cz.muni.fi.neural.impl;
 
+import cz.muni.fi.neural.lib.Neuron;
 import cz.muni.fi.neural.lib.Weight;
 
 /**
@@ -21,6 +22,11 @@ public class WeightImpl implements Weight {
 	@Override
 	public void setValue(double value) {
 		this.value = value;
+	}
+
+	@Override
+	public String toString() {
+		return "{" + value + "}";
 	}
 }
 

@@ -51,7 +51,14 @@ public class Utils {
 
 	public static void checkEqualSize(List<?> list1, List<?> list2) {
 		if (list1.size() != list2.size()) {
-			throw new IllegalArgumentException("Lists has to have equal size");
+			throw new IllegalArgumentException("Lists has to have equal size. " +
+					"list1 = " + list1 + ", list2 = " + list2);
+		}
+	}
+	public static void checkEqualSize(int list1Size, List<?> list2) {
+		if (list1Size != list2.size()) {
+			throw new IllegalArgumentException("Lists has to have equal size. " +
+					"list1.size = " + list1Size + ", list2 = " + list2);
 		}
 	}
 }

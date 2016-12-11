@@ -2,6 +2,7 @@ package cz.muni.fi.neural;
 
 import cz.muni.fi.neural.impl.ActivationFunctionTanh;
 import cz.muni.fi.neural.impl.MultilayerPerceptron;
+import cz.muni.fi.neural.impl.TrainingSample;
 import cz.muni.fi.neural.impl.WeightsInitAlgorithmRandom;
 import cz.muni.fi.neural.lib.ActivationFunction;
 import cz.muni.fi.neural.lib.NeuralNetwork;
@@ -37,29 +38,13 @@ public class Main {
         }
 
         dataMatrix = dataReader.normalize(dataMatrix);
-        Double[][] inputsMatrix = dataReader.getInputsMatrixWithBiasInput(dataMatrix);
-        Double[] outputsVector = dataReader.getOutputVector(dataMatrix);
+        List<TrainingSample> trainingSet = dataReader.getTrainingSet(dataMatrix);
 
-//                for(int i=0; i < inputsMatrix.length; i++) {
-//                        System.out.print(i + " ");
-//                        for (int j = 0; j < inputsMatrix[1].length; j++) {
-//                                System.out.print(inputsMatrix[i][j] + " ");
-//                            }
-//                      System.out.println();
-//                   }
-//        for(int i=0; i < outputsVector.length; i++) {
-//            System.out.print(i + " ");
-//            System.out.print(outputsVector[i] + " ");
-//
-//            System.out.println();
-//        }
         List<Integer> layersStructure = new ArrayList<>();
-        int inputLayerSize = mlpConfig.getInputVectors().size();
-        int outputLayerSize = 1;
 
-        layersStructure.add(inputLayerSize);
+        layersStructure.add(mlpConfig.getInputSize());
         layersStructure.addAll(mlpConfig.getMlpArchitecture());
-        layersStructure.add(outputLayerSize);
+        layersStructure.add(mlpConfig.getOutputSize());
 
         ActivationFunction ac = new ActivationFunctionTanh(1);
         WeightsInitAlgorithm wia = new WeightsInitAlgorithmRandom(-0.3, 0.3);
@@ -74,11 +59,12 @@ public class Main {
 
             NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
 
-            double origErr = net.error(inputsMatrix, outputsVector);
+            double origErr = net.error(trainingSet);
 
-            net.learn(inputsMatrix, outputsVector);
+            net.train(trainingSet);
 
-            if (net.error(inputsMatrix, outputsVector) < origErr/10) {
+            double trainedError = net.error(trainingSet);
+            if (trainedError < origErr/10) {
                 correct++;
             }
             System.out.print("|");

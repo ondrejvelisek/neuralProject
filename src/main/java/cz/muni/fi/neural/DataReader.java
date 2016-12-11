@@ -1,6 +1,7 @@
 package cz.muni.fi.neural;
 
 import au.com.bytecode.opencsv.CSVReader;
+import cz.muni.fi.neural.impl.TrainingSample;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -79,43 +80,23 @@ public class DataReader {
         return matrix;
     }
 
-    public Double[][] getInputsMatrixWithBiasInput(List<List<Double>> dataMatrix){
+
+    public List<TrainingSample> getTrainingSet(List<List<Double>> dataMatrix){
         ConfigReader  mlpConfig = ConfigReader.getInstance();
 
-        int numberOfInputVariables = mlpConfig.getInputVectors().size();
-        Double[][] inputsMatrix = new Double[dataMatrix.size()][numberOfInputVariables + 1];
-
-        int i = 0;
-        int k = 0;
-        List<Integer> inputVectorsIndices = mlpConfig.getInputVectors();
-        for (List<Double> row : dataMatrix) {
-            k = 0;
-            for(int j : inputVectorsIndices){
-                inputsMatrix[i][k] = row.get(j);
-                k++;
-            }
-            inputsMatrix[i][k] = 1.0;
-            i++;
-        }
-        return inputsMatrix;
-    }
-
-
-    public Double[] getOutputVector(List<List<Double>> dataMatrix){
-        ConfigReader  mlpConfig = ConfigReader.getInstance();
-
-        int numberOfInptutVaribles = mlpConfig.getInputVectors().size();
-        Double[] outputsVector = new Double[dataMatrix.size()];
-
-        int i = 0;
-        int outputVectorIndex = mlpConfig.getOutputVector();
+        List<TrainingSample> trainingSet = new ArrayList<>();
+        int inputSize = mlpConfig.getInputSize();
+        int outputSize = mlpConfig.getOutputSize();
 
         for (List<Double> row : dataMatrix) {
-            outputsVector[i] = row.get(outputVectorIndex);
-            i++;
-        }
 
-        return outputsVector;
+            List<Double> input = new ArrayList<>(row.subList(0, inputSize));
+
+            List<Double> output = new ArrayList<>(row.subList(inputSize, inputSize+outputSize));
+
+            trainingSet.add(new TrainingSample(input, output));
+        }
+        return trainingSet;
     }
 
 }
