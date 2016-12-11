@@ -5,9 +5,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,15 +14,20 @@ import java.util.List;
  */
 public class DataReader {
     private CSVReader reader;
+    private List<Integer> trainingSetIndices;
+    private List<Integer> validationSetIndices;
+    private List<Integer> testSetIndices;
 
     public DataReader(){
-
     }
+
     public void setFile(String fileName) throws FileNotFoundException {
-        reader = new CSVReader(new FileReader(fileName));
+        ConfigReader mlpConfig = ConfigReader.getInstance();
+        reader = new CSVReader(new FileReader(fileName),mlpConfig.getCsvSeparator());
     }
 
     public List<List<Double>> csvToMatrix() throws IOException {
+        ConfigReader mlpConfig = ConfigReader.getInstance();
         String [] nextLine;
         List<List<Double>> matrix = new ArrayList<List<Double>>();
         while ((nextLine = reader.readNext()) != null) {
@@ -120,4 +123,55 @@ public class DataReader {
         return outputsVector;
     }
 
+    public void splitDataSet(double trainingSetRelativeSize, double validationSetRelativeSize, double testSetRelativeSize, int dataSetSize){
+
+        int trainingLimit = (int)(trainingSetRelativeSize * dataSetSize);
+        int validationLimit = (int)((trainingSetRelativeSize + validationSetRelativeSize) * dataSetSize);
+
+        List<Integer> dataSetIndices = new ArrayList<Integer>();
+
+        for (int i=0; i < dataSetSize; i++) {
+            dataSetIndices.add(i);
+        }
+        Collections.shuffle(dataSetIndices);
+
+        trainingSetIndices = new ArrayList<Integer>();
+        for(int i = 0; i < trainingLimit; i++){
+            trainingSetIndices.add(dataSetIndices.get(i));
+        }
+
+        validationSetIndices = new ArrayList<Integer>();
+        for(int i = trainingLimit; i < validationLimit; i++){
+            validationSetIndices.add(dataSetIndices.get(i));
+        }
+
+        testSetIndices = new ArrayList<Integer>();
+        for(int i = validationLimit; i < dataSetSize; i++){
+            testSetIndices.add(dataSetIndices.get(i));
+        }
+    }
+
+    List<List<Double>> getTrainingSet(List<List<Double>> dataSet){
+        List<List<Double>> trainingSet = new ArrayList<List<Double>>();
+        for(Integer index : trainingSetIndices){
+            trainingSet.add(dataSet.get(index));
+        }
+        return trainingSet;
+    }
+
+    List<List<Double>> getValidationSet(List<List<Double>> dataSet){
+        List<List<Double>> validatioSet = new ArrayList<List<Double>>();
+        for(Integer index : validationSetIndices){
+            validatioSet.add(dataSet.get(index));
+        }
+        return validatioSet;
+    }
+
+    List<List<Double>> getTestSet(List<List<Double>> dataSet){
+        List<List<Double>> testSet = new ArrayList<List<Double>>();
+        for(Integer index : testSetIndices){
+            testSet.add(dataSet.get(index));
+        }
+        return testSet;
+    }
 }

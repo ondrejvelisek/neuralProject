@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -52,9 +51,9 @@ public class ConfigReader {
         String [] propValues = prop.split(",");
 
         List<Integer> inputVectors = new ArrayList<>();
-            for (int i = 0; i < propValues.length; i++) {
-                inputVectors.add(Integer.parseInt(propValues[i]) - 1);
-            }
+        for (int i = 0; i < propValues.length; i++) {
+            inputVectors.add(Integer.parseInt(propValues[i]) - 1);
+        }
         return inputVectors;
     }
 
@@ -70,8 +69,16 @@ public class ConfigReader {
         return value;
     }
 
+    public String getDataSourceName(){
+        return props.getProperty("dataSourceName");
+    }
+
+    public char getCsvSeparator(){
+        return props.getProperty("csvSeparator").charAt(0);
+    }
+
     public boolean initializationDebug()throws NumberFormatException{
-       return Boolean.parseBoolean(props.getProperty("initializationDebug"));
+        return Boolean.parseBoolean(props.getProperty("initializationDebug"));
     }
 
     public boolean learningIterationsDebug()throws NumberFormatException{
@@ -86,4 +93,7 @@ public class ConfigReader {
         return Boolean.parseBoolean(props.getProperty("outputsOfLearningDebug"));
     }
 
+    public boolean loadedDatasetDebug()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("loadedDatasetDebug"));
+    }
 }

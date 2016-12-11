@@ -7,6 +7,8 @@ import java.util.logging.*;
 public class Main {
     public static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
+
+
     public static void main(String[] args){
         ConfigReader  mlpConfig = ConfigReader.getInstance();
         DataReader dataReader = new DataReader();
@@ -21,7 +23,7 @@ public class Main {
         }
 
         try {
-            dataReader.setFile("xor_dataset.csv");
+            dataReader.setFile(mlpConfig.getDataSourceName());
             dataMatrix = dataReader.csvToMatrix();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -30,22 +32,39 @@ public class Main {
         }
 
         dataMatrix = dataReader.normalize(dataMatrix);
-        Double[][] inputsMatrix = dataReader.getInputsMatrixWithBiasInput(dataMatrix);
-        Double[] outputsVector = dataReader.getOutputVector(dataMatrix);
+        dataReader.splitDataSet(0.6,0.2,0.2,dataMatrix.size());
 
-//                for(int i=0; i < inputsMatrix.length; i++) {
-//                        System.out.print(i + " ");
-//                        for (int j = 0; j < inputsMatrix[1].length; j++) {
-//                                System.out.print(inputsMatrix[i][j] + " ");
-//                            }
-//                      System.out.println();
-//                   }
-//        for(int i=0; i < outputsVector.length; i++) {
-//            System.out.print(i + " ");
-//            System.out.print(outputsVector[i] + " ");
+        List<List<Double>> trainingSet = dataReader.getTrainingSet(dataMatrix);
+        List<List<Double>> validationSet = dataReader.getValidationSet(dataMatrix);
+        List<List<Double>> testSet = dataReader.getTestSet(dataMatrix);
+
+        Double[][] trainingInputsMatrix = dataReader.getInputsMatrixWithBiasInput(trainingSet);
+        Double[] trainingOutputsVector = dataReader.getOutputVector(trainingSet);
+        System.out.println(trainingInputsMatrix.length);
+        Double[][] validationInputsMatrix = dataReader.getInputsMatrixWithBiasInput(validationSet);
+        Double[] validationOutputsVector = dataReader.getOutputVector(validationSet);
+        System.out.println(validationInputsMatrix.length);
+
+        Double[][] testInputsMatrix = dataReader.getInputsMatrixWithBiasInput(testSet);
+        Double[] testOutputsVector = dataReader.getOutputVector(testSet);
+        System.out.println(testInputsMatrix.length);
+
+//        if(mlpConfig.loadedDatasetDebug()) {
+//            for (int i = 0; i < inputsMatrix.length; i++) {
+//                System.out.print(i + " ");
+//                for (int j = 0; j < inputsMatrix[1].length; j++) {
+//                    System.out.print(inputsMatrix[i][j] + " ");
+//                }
+//                System.out.println();
+//            }
+//            for (int i = 0; i < outputsVector.length; i++) {
+//                System.out.print(i + " ");
+//                System.out.print(outputsVector[i] + " ");
 //
-//            System.out.println();
+//                System.out.println();
+//            }
 //        }
+
         List<Integer> layersStructure = new ArrayList<>();
         int inputLayerSize = mlpConfig.getInputVectors().size();
         int outputLayerSize = 1;
@@ -56,8 +75,10 @@ public class Main {
 
         NeuralNetwork net = new MultilayerPerceptron(layersStructure);
 
-        net.learn(inputsMatrix, outputsVector);
+       // net.learn(inputsMatrix, outputsVector);
 
     }
+
+
 
 }
