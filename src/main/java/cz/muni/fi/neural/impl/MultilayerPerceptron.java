@@ -90,10 +90,9 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	}
 
-	private double learningRate(double time) {
+	private double learningRate(int time) {
 
-		//return 0.05/(time/5+1);
-		return 0.1;
+		return 0.5/(time/5+1);
 
 	}
 
