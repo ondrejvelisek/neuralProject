@@ -40,14 +40,12 @@ public class Main {
 
         Double[][] trainingInputsMatrix = dataReader.getInputsMatrixWithBiasInput(trainingSet);
         Double[] trainingOutputsVector = dataReader.getOutputVector(trainingSet);
-        System.out.println(trainingInputsMatrix.length);
+
         Double[][] validationInputsMatrix = dataReader.getInputsMatrixWithBiasInput(validationSet);
         Double[] validationOutputsVector = dataReader.getOutputVector(validationSet);
-        System.out.println(validationInputsMatrix.length);
 
         Double[][] testInputsMatrix = dataReader.getInputsMatrixWithBiasInput(testSet);
         Double[] testOutputsVector = dataReader.getOutputVector(testSet);
-        System.out.println(testInputsMatrix.length);
 
 //        if(mlpConfig.loadedDatasetDebug()) {
 //            for (int i = 0; i < inputsMatrix.length; i++) {
@@ -75,7 +73,7 @@ public class Main {
 
         NeuralNetwork net = new MultilayerPerceptron(layersStructure);
 
-       // net.learn(inputsMatrix, outputsVector);
+        net.learn(trainingInputsMatrix, trainingOutputsVector, validationInputsMatrix, validationOutputsVector);
 
     }
 

@@ -73,40 +73,57 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		return inputsForNextLayer;
 	}
 
-	public void learn(Double[][] inputsMatrix, Double[] outputsVector) {
-		int trainingSetSize = outputsVector.length;
+	public void learn(Double[][]trainingInputsMatrix, Double[] trainingOutputsVector, Double[][] validationInputsMatrix, Double[] validationOutputsVector) {
+		int trainingSetSize = trainingOutputsVector.length;
 
 		ConfigReader  mlpConfig = ConfigReader.getInstance();
 		int miniBatchSize = mlpConfig.getBatchSize();
 
-		Double[][] miniBatchInputs = new Double[miniBatchSize][inputsMatrix[0].length];
+		Double[][] miniBatchInputs = new Double[miniBatchSize][trainingInputsMatrix[0].length];
 		Double[] miniBatchOutputs = new Double[miniBatchSize];
 
 		int t = 0;
 		int currentSize = 0;
-		if(mlpConfig.learningIterationsDebug()){
-			logger.info("-------------LEARNING-------------");
-			logger.info("Learning properties:");
-			logger.info("Mini batch size: " + miniBatchSize);
-			logger.info("----------------------------------");
-		}
-		for(int i = 0; i < 50; i++){
+		logger.info("-------------LEARNING-------------");
+		logger.info("Learning properties:");
+		logger.info("Mini batch size: " + miniBatchSize);
+		logger.info("----------------------------------");
+
+		int errorNotDecreased = 0;
+		Double minimalError = null;
+		while(errorNotDecreased <= 10){
 			for (int j = 0; j < trainingSetSize; j++) {
-				miniBatchInputs[currentSize] = inputsMatrix[j];
-				miniBatchOutputs[currentSize] = outputsVector[j];
+				miniBatchInputs[currentSize] = trainingInputsMatrix[j];
+				miniBatchOutputs[currentSize] = trainingOutputsVector[j];
 				currentSize++;
 				if (currentSize == miniBatchSize) {
-					if(mlpConfig.learningIterationsDebug())
+					if(mlpConfig.learningError() || mlpConfig.validationError() || mlpConfig.outputsOfLearningDebug())
 						logger.info("Iteration: " + t);
 
 					miniLearn(t, miniBatchInputs, miniBatchOutputs);
 
-					miniBatchInputs = new Double[miniBatchSize][inputsMatrix[0].length];
+					miniBatchInputs = new Double[miniBatchSize][trainingInputsMatrix[0].length];
 					miniBatchOutputs = new Double[miniBatchSize];
 					currentSize = 0;
 					t++;
+					Double currentError = error(validationInputsMatrix ,validationOutputsVector);
 
-					if(mlpConfig.learningIterationsDebug())
+					if(t == 1){
+						minimalError = currentError;
+					}
+					else if (currentError > minimalError){
+						errorNotDecreased++;
+					}
+					else{
+						minimalError = currentError;
+						errorNotDecreased = 0;
+					}
+
+					if(mlpConfig.validationError()) {
+						logger.info("Validation error(MSE: " + currentError);
+					}
+
+					if(mlpConfig.learningError() || mlpConfig.validationError() || mlpConfig.outputsOfLearningDebug())
 						logger.info("------------------------");
 				}
 			}
@@ -136,26 +153,22 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	}
 
-	public double error(Map<List<Double>, List<Double>> trainingSet) {
+	public double error(Double[][] input, Double[] output) {
 
 		double error = 0;
 
-		for (Map.Entry<List<Double>, List<Double>> trainingSample : trainingSet.entrySet()) {
-			List<Double> sampleInput = trainingSample.getKey();
-			List<Double> desireOutput = trainingSample.getValue();
+		for (int i = 0; i < input.length; i++) {
+			Double[] sampleInput = input[i];
+			Double desireOutput = output[i];
 
-			List<Double> sampleOutput = computeOutput(sampleInput);
+			List<Double> sampleOutput = computeOutput(Arrays.asList(sampleInput));
 
-			List<Double> errorPerOutputs = Utils.zipLists(sampleOutput, desireOutput, (sample, desire) -> Math.pow(sample - desire, 2));
+			Double errorPerOutput = Math.pow(sampleOutput.get(0) - desireOutput, 2);
 
-			for (double errorPerOutput : errorPerOutputs) {
-				error += errorPerOutput;
-			}
+			error += errorPerOutput;
 
 		}
-
-		return error;
-
+		return error/input.length;
 	}
 
 
@@ -224,8 +237,8 @@ public class MultilayerPerceptron implements NeuralNetwork {
 				}
 			}
 		}
-		if(ConfigReader.getInstance().learningIterationsDebug())
-			logger.info("Error MSE:"+error / trainingSetSize);
+		if(ConfigReader.getInstance().learningError())
+			logger.info("Training error (MSE):"+error / trainingSetSize);
 		return gradient;
 
 	}

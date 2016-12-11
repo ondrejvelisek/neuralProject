@@ -81,8 +81,12 @@ public class ConfigReader {
         return Boolean.parseBoolean(props.getProperty("initializationDebug"));
     }
 
-    public boolean learningIterationsDebug()throws NumberFormatException{
-        return Boolean.parseBoolean(props.getProperty("learningIterationsDebug"));
+    public boolean learningError()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("learningError"));
+    }
+
+    public boolean validationError()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("validationError"));
     }
 
     public boolean neuronInputsDebug()throws NumberFormatException{
