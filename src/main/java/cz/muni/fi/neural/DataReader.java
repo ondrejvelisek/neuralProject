@@ -77,7 +77,7 @@ public class DataReader {
                 Double max = maxOfColums.get(j);
                 Double min = minOfColums.get(j);
 
-                Double normalized = 2 * (x - min) / (max - min) -1;
+                Double normalized = (2 * ((x - min) / (max - min))) -1;
                 matrix.get(i).set(j, normalized);
             }
         }

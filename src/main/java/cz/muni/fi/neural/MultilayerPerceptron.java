@@ -90,8 +90,10 @@ public class MultilayerPerceptron implements NeuralNetwork {
 		logger.info("----------------------------------");
 
 		int errorNotDecreased = 0;
-		Double minimalError = null;
-		while(errorNotDecreased <= 5){
+		//Double minimalError = null;
+		Double lastError = null;
+		int stoppingLimit = 5;
+		while(errorNotDecreased <= stoppingLimit){
 			for (int j = 0; j < trainingSetSize; j++) {
 				miniBatchInputs[currentSize] = trainingInputsMatrix[j];
 				miniBatchOutputs[currentSize] = trainingOutputsVector[j];
@@ -107,17 +109,29 @@ public class MultilayerPerceptron implements NeuralNetwork {
 					currentSize = 0;
 					t++;
 					Double currentError = error(validationInputsMatrix ,validationOutputsVector);
-
-					if(t == 1){
-						minimalError = currentError;
-					}
-					else if (currentError > minimalError){
+					if((lastError != null) &&(currentError > lastError)){
 						errorNotDecreased++;
+						if(errorNotDecreased >= stoppingLimit) break;
 					}
 					else{
-						minimalError = currentError;
 						errorNotDecreased = 0;
 					}
+					lastError = currentError;
+
+//					if(t == 1){
+//						minimalError = currentError;
+//					}
+//					else if (currentError > minimalError){
+//						errorNotDecreased++;
+//						logger.info(""+errorNotDecreased);
+//						if(errorNotDecreased >= stoppingLimit) break;
+//					}
+//					else{
+//						minimalError = currentError;
+//						errorNotDecreased = 0;
+//					}
+
+
 
 					if(mlpConfig.validationError()) {
 						logger.info("Validation error(MSE: " + currentError);
@@ -147,7 +161,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	}
 
 	private double learningRate(double time) {
-		//return 0.05/(time/5+1);
+		//return 0.5/(time/20+1);
 		return ConfigReader.getInstance().getLearningRate();
 	}
 

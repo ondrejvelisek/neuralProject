@@ -47,21 +47,21 @@ public class Main {
         Double[][] testInputsMatrix = dataReader.getInputsMatrixWithBiasInput(testSet);
         Double[] testOutputsVector = dataReader.getOutputVector(testSet);
 
-//        if(mlpConfig.loadedDatasetDebug()) {
-//            for (int i = 0; i < inputsMatrix.length; i++) {
-//                System.out.print(i + " ");
-//                for (int j = 0; j < inputsMatrix[1].length; j++) {
-//                    System.out.print(inputsMatrix[i][j] + " ");
-//                }
-//                System.out.println();
-//            }
-//            for (int i = 0; i < outputsVector.length; i++) {
-//                System.out.print(i + " ");
-//                System.out.print(outputsVector[i] + " ");
-//
-//                System.out.println();
-//            }
-//        }
+        if(mlpConfig.loadedDatasetDebug()) {
+            for (int i = 0; i < trainingInputsMatrix.length; i++) {
+                System.out.print(i + " ");
+                for (int j = 0; j < trainingInputsMatrix[1].length; j++) {
+                    System.out.print(trainingInputsMatrix[i][j] + " ");
+                }
+                System.out.println();
+            }
+            for (int i = 0; i < trainingOutputsVector.length; i++) {
+                System.out.print(i + " ");
+                System.out.print(trainingOutputsVector[i] + " ");
+
+                System.out.println();
+            }
+        }
 
         List<Integer> layersStructure = new ArrayList<>();
         int inputLayerSize = mlpConfig.getInputVectors().size();

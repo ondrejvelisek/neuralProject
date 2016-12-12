@@ -33,6 +33,7 @@ public class NeuronImpl implements Neuron {
 		List<Double> list = new ArrayList<>();
 		for (int i = 0; i < inputSize; i++) {
 			list.add(-0.1 + 0.2 * r.nextDouble());
+			//list.add(0.5);
 		}
 		return list;
 
