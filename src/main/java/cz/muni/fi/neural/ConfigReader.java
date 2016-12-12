@@ -69,6 +69,12 @@ public class ConfigReader {
         return value;
     }
 
+    public double getLearningRate() throws NumberFormatException{
+        String prop = props.getProperty("learningRate");
+        Double value = Double.parseDouble(prop);
+        return value;
+    }
+
     public String getDataSourceName(){
         return props.getProperty("dataSourceName");
     }

@@ -91,7 +91,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 		int errorNotDecreased = 0;
 		Double minimalError = null;
-		while(errorNotDecreased <= 10){
+		while(errorNotDecreased <= 5){
 			for (int j = 0; j < trainingSetSize; j++) {
 				miniBatchInputs[currentSize] = trainingInputsMatrix[j];
 				miniBatchOutputs[currentSize] = trainingOutputsVector[j];
@@ -147,10 +147,8 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	}
 
 	private double learningRate(double time) {
-
 		//return 0.05/(time/5+1);
-		return 0.1;
-
+		return ConfigReader.getInstance().getLearningRate();
 	}
 
 	public double error(Double[][] input, Double[] output) {
@@ -193,11 +191,10 @@ public class MultilayerPerceptron implements NeuralNetwork {
 			List<Double> sampleOutput = new ArrayList<Double>(Arrays.asList(neuronOutputs.get(outputNeuron)));
 
 			if(ConfigReader.getInstance().outputsOfLearningDebug()) {
-				//logger.info("input: " + sampleInput);
-				//logger.info("output: " + new DecimalFormat("#0.00").format(sampleOutput.get(0)));
-				//logger.info("output: " + sampleOutput.get(0));
+				logger.info("input: " + sampleInput);
+				logger.info("output: " + sampleOutput.get(0));
 
-				//logger.info("desire: " + desireOutput.get(0));
+				logger.info("desire: " + desireOutput.get(0));
 			}
 
 			error += Math.pow(sampleOutput.get(0) - desireOutput.get(0), 2);

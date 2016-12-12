@@ -75,6 +75,8 @@ public class Main {
 
         net.learn(trainingInputsMatrix, trainingOutputsVector, validationInputsMatrix, validationOutputsVector);
 
+        Double modelTestError = net.error(testInputsMatrix, testOutputsVector);
+        logger.info("Test error (MSE): " + modelTestError);
     }
 
 
