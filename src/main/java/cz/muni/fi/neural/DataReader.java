@@ -36,15 +36,15 @@ public class DataReader {
             boolean lineError = false;
             for(String value : nextLine){
                 double doubleValue;
-                try {
-                    doubleValue = Double.parseDouble(value);
+                if(!value.equals("")){
+                    try {
+                        doubleValue = Double.parseDouble(value);
+                    } catch (NumberFormatException e) {
+                        lineError = true;
+                        break;
+                    }
+                    exampleValues.add(doubleValue);
                 }
-                catch(NumberFormatException e)
-                {
-                    lineError = true;
-                    break;
-                }
-                exampleValues.add(doubleValue);
             }
             if (!lineError) {
                 matrix.add(exampleValues);
@@ -54,7 +54,7 @@ public class DataReader {
     }
 
     //scale into [-1,1] (min max normanalization)
-    public List<List<Double>> normalize(List<List<Double>> matrix)
+    public List<List<Double>> normalizeInputs(List<List<Double>> matrix)
     {
         List<List<Double>> variables = new ArrayList<>();
         for(int j =0; j < matrix.get(1).size(); j++){
@@ -71,6 +71,7 @@ public class DataReader {
             maxOfColums.add(Collections.max(column));
             minOfColums.add(Collections.min(column));
         }
+
 
         for(int i =0; i < matrix.size(); i++) {
             for (int j = 0; j < matrix.get(i).size(); j++) {

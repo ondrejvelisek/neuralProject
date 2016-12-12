@@ -29,7 +29,7 @@ public class Main {
         }
 
         try {
-            dataReader.setFile("xor_dataset.csv");
+            dataReader.setFile(mlpConfig.getDataSourceName());
             dataMatrix = dataReader.csvToMatrix();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -37,7 +37,21 @@ public class Main {
             e.printStackTrace();
         }
 
-        dataMatrix = dataReader.normalize(dataMatrix);
+        dataMatrix = dataReader.normalizeInputs(dataMatrix);
+
+        if(mlpConfig.loadedDatasetDebug()) {
+            int i = 0;
+            for(List<Double> row : dataMatrix) {
+                i++;
+                System.out.print(i + ". ");
+                for(Double value : row) {
+                    System.out.print(value + " ");
+                }
+                System.out.println();
+            }
+        }
+
+
 
         dataReader.splitDataSet(0.6,0.2,0.2,dataMatrix.size());
 
@@ -57,31 +71,36 @@ public class Main {
         ActivationFunction ac = new ActivationFunctionTanh(1);
         WeightsInitAlgorithm wia = new WeightsInitAlgorithmRandom(-0.1, 0.1);
 
-        int n = 1;
-        int correct = 0;
-        for (int i = 0; i < n; i++) {
-            System.out.print(".");
-        }
-        System.out.println();
-        for (int i = 0; i < n; i++) {
+        NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
 
-            NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
+        net.train(trainingSet, validationSet);
+        logger.info("Test error (MSE):" + net.error(testSet));
 
-            double origErr = net.error(trainingSet);
-
-            net.train(trainingSet);
-
-            double trainedError = net.error(trainingSet);
-            if (trainedError < origErr/10) {
-                correct++;
-            }
-            System.out.print("|");
-        }
-        System.out.println();
-        System.out.println("Total experiments: " + n);
-        System.out.println("Successful experiments: " + correct);
-
-
-    }
+//        int n = 100;
+//        int correct = 0;
+//        for (int i = 0; i < n; i++) {
+//            System.out.print(".");
+//        }
+//        System.out.println();
+//        for (int i = 0; i < n; i++) {
+//
+//            NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
+//
+//            double origErr = net.error(trainingSet);
+//
+//            net.train(trainingSet, validationSet);
+//
+//            double trainedError = net.error(trainingSet);
+//            if (trainedError < origErr/10) {
+//                correct++;
+//            }
+//            System.out.print("|");
+//        }
+//        System.out.println();
+//        System.out.println("Total experiments: " + n);
+//        System.out.println("Successful experiments: " + correct);
+//
+//
+       }
 
 }
