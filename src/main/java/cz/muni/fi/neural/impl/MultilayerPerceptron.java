@@ -6,7 +6,6 @@ import cz.muni.fi.neural.Utils;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -50,24 +49,23 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	}
 
 	@Override
-	public void train(List<TrainingSample> trainingSet) {
+	public void train(List<DataSample> trainingSet) {
 
 		ConfigReader  mlpConfig = ConfigReader.getInstance();
 		int miniBatchSize = mlpConfig.getBatchSize();
 
 		int t = 0;
-		List<TrainingSample> miniTrainingSet = new ArrayList<>();
-		if(mlpConfig.learningIterationsDebug()){
-			logger.info("-------------LEARNING-------------");
-			logger.info("Learning properties:");
-			logger.info("Mini batch size: " + miniBatchSize);
-			logger.info("----------------------------------");
-		}
-		for(int i = 0; i < 50; i++){
-			for (TrainingSample sample : trainingSet) {
+		List<DataSample> miniTrainingSet = new ArrayList<>();
+		logger.info("-------------LEARNING-------------");
+		logger.info("Learning properties:");
+		logger.info("Mini batch size: " + miniBatchSize);
+		logger.info("----------------------------------");
+
+		for(int i = 0; i < 100; i++){
+			for (DataSample sample : trainingSet) {
 				miniTrainingSet.add(sample);
 				if (miniTrainingSet.size() == miniBatchSize) {
-					if(mlpConfig.learningIterationsDebug())
+					if(mlpConfig.learningError() || mlpConfig.validationError() || mlpConfig.outputsOfLearningDebug())
 						logger.info("Iteration: " + t);
 
 					miniTrain(t, miniTrainingSet);
@@ -75,14 +73,14 @@ public class MultilayerPerceptron implements NeuralNetwork {
 					miniTrainingSet.clear();
 					t++;
 
-					if(mlpConfig.learningIterationsDebug())
+					if(mlpConfig.learningError() || mlpConfig.validationError() || mlpConfig.outputsOfLearningDebug())
 						logger.info("------------------------");
 				}
 			}
 		}
 	}
 
-	private void miniTrain(int time, List<TrainingSample> miniTrainingSet) {
+	private void miniTrain(int time, List<DataSample> miniTrainingSet) {
 
 		Map<Weight, Double> miniGradient = computeGradient(miniTrainingSet);
 
@@ -92,8 +90,8 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 	private double learningRate(int time) {
 
-		return 0.5/(time/5+1);
-
+		//return 0.5/(time/5+1);
+		return 0.1;
 	}
 
 	/**
@@ -101,11 +99,11 @@ public class MultilayerPerceptron implements NeuralNetwork {
 	 *
 	 * @return
 	 */
-	private Map<Weight, Double> computeGradient(List<TrainingSample> trainingSet) {
+	private Map<Weight, Double> computeGradient(List<DataSample> trainingSet) {
 
 		Map<Weight, Double> gradient = new HashMap<>();
 
-		for (TrainingSample sample : trainingSet){
+		for (DataSample sample : trainingSet){
 
 			Map<Neuron, Double> neuronOutputs = forwardPass(sample.getInput());
 
@@ -157,10 +155,9 @@ public class MultilayerPerceptron implements NeuralNetwork {
 				}
 			}
 		}
-		if(ConfigReader.getInstance().learningIterationsDebug()) {
-			logger.info("Error MSE:" + error(trainingSet));
+		if(ConfigReader.getInstance().learningError()) {
+			logger.info("Training error (MSE):" + error(trainingSet));
 		}
-
 		return gradient;
 
 	}
@@ -230,11 +227,11 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
 
 	@Override
-	public double error(List<TrainingSample> trainingSet) {
+	public double error(List<DataSample> trainingSet) {
 
 		double error = 0;
 
-		for (TrainingSample sample : trainingSet) {
+		for (DataSample sample : trainingSet) {
 
 			List<Double> sampleOutput = computeOutput(sample.getInput());
 

@@ -1,7 +1,7 @@
 package cz.muni.fi.neural;
 
 import au.com.bytecode.opencsv.CSVReader;
-import cz.muni.fi.neural.impl.TrainingSample;
+import cz.muni.fi.neural.impl.DataSample;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -15,15 +15,20 @@ import java.util.List;
  */
 public class DataReader {
     private CSVReader reader;
+    private List<Integer> trainingSetIndices;
+    private List<Integer> validationSetIndices;
+    private List<Integer> testSetIndices;
 
     public DataReader(){
-
     }
+
     public void setFile(String fileName) throws FileNotFoundException {
-        reader = new CSVReader(new FileReader(fileName));
+        ConfigReader mlpConfig = ConfigReader.getInstance();
+        reader = new CSVReader(new FileReader(fileName),mlpConfig.getCsvSeparator());
     }
 
     public List<List<Double>> csvToMatrix() throws IOException {
+        ConfigReader mlpConfig = ConfigReader.getInstance();
         String [] nextLine;
         List<List<Double>> matrix = new ArrayList<List<Double>>();
         while ((nextLine = reader.readNext()) != null) {
@@ -73,30 +78,87 @@ public class DataReader {
                 Double max = maxOfColums.get(j);
                 Double min = minOfColums.get(j);
 
-                Double normalized = 2 * (x - min) / (max - min) -1;
+                Double normalized = (2 * ((x - min) / (max - min))) -1;
                 matrix.get(i).set(j, normalized);
             }
         }
         return matrix;
     }
 
-
-    public List<TrainingSample> getTrainingSet(List<List<Double>> dataMatrix){
+    public List<DataSample> transformToDataSamples(List<List<Double>> dataMatrix){
         ConfigReader  mlpConfig = ConfigReader.getInstance();
+        List<Integer> inputVectorsIndices = mlpConfig.getInputVectors();
+        List<Integer> outputVectorIndeces = mlpConfig.getOutputVectors();
 
-        List<TrainingSample> trainingSet = new ArrayList<>();
-        int inputSize = mlpConfig.getInputSize();
-        int outputSize = mlpConfig.getOutputSize();
+        List<DataSample> dataSamples = new ArrayList<>();
 
         for (List<Double> row : dataMatrix) {
 
-            List<Double> input = new ArrayList<>(row.subList(0, inputSize));
+            List<Double> input = new ArrayList<>();
+            for(int index : inputVectorsIndices){
+                input.add(row.get(index));
+            }
 
-            List<Double> output = new ArrayList<>(row.subList(inputSize, inputSize+outputSize));
+            List<Double> output = new ArrayList<>();
+            for(int index : outputVectorIndeces){
+                output.add(row.get(index));
+            }
 
-            trainingSet.add(new TrainingSample(input, output));
+            dataSamples.add(new DataSample(input, output));
+        }
+        return dataSamples;
+    }
+
+    public void splitDataSet(double trainingSetRelativeSize, double validationSetRelativeSize, double testSetRelativeSize, int dataSetSize){
+
+        int trainingLimit = (int)(trainingSetRelativeSize * dataSetSize);
+        int validationLimit = (int)((trainingSetRelativeSize + validationSetRelativeSize) * dataSetSize);
+
+        List<Integer> dataSetIndices = new ArrayList<Integer>();
+
+        for (int i=0; i < dataSetSize; i++) {
+            dataSetIndices.add(i);
+        }
+        Collections.shuffle(dataSetIndices);
+
+        trainingSetIndices = new ArrayList<Integer>();
+        for(int i = 0; i < trainingLimit; i++){
+            trainingSetIndices.add(dataSetIndices.get(i));
+        }
+
+        validationSetIndices = new ArrayList<Integer>();
+        for(int i = trainingLimit; i < validationLimit; i++){
+            validationSetIndices.add(dataSetIndices.get(i));
+        }
+
+        testSetIndices = new ArrayList<Integer>();
+        for(int i = validationLimit; i < dataSetSize; i++){
+            testSetIndices.add(dataSetIndices.get(i));
+        }
+    }
+
+    List<List<Double>> getTrainingSet(List<List<Double>> dataSet){
+        List<List<Double>> trainingSet = new ArrayList<List<Double>>();
+        for(Integer index : trainingSetIndices){
+            trainingSet.add(dataSet.get(index));
         }
         return trainingSet;
+    }
+
+    List<List<Double>> getValidationSet(List<List<Double>> dataSet){
+        List<List<Double>> validatioSet = new ArrayList<List<Double>>();
+        for(Integer index : validationSetIndices){
+            validatioSet.add(dataSet.get(index));
+        }
+        return validatioSet;
+    }
+
+    List<List<Double>> getTestSet(List<List<Double>> dataSet){
+        List<List<Double>> testSet = new ArrayList<List<Double>>();
+        for(Integer index : testSetIndices){
+            testSet.add(dataSet.get(index));
+        }
+        return testSet;
     }
 
 }

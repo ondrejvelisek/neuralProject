@@ -2,7 +2,7 @@ package cz.muni.fi.neural;
 
 import cz.muni.fi.neural.impl.ActivationFunctionTanh;
 import cz.muni.fi.neural.impl.MultilayerPerceptron;
-import cz.muni.fi.neural.impl.TrainingSample;
+import cz.muni.fi.neural.impl.DataSample;
 import cz.muni.fi.neural.impl.WeightsInitAlgorithmRandom;
 import cz.muni.fi.neural.lib.ActivationFunction;
 import cz.muni.fi.neural.lib.NeuralNetwork;
@@ -38,18 +38,26 @@ public class Main {
         }
 
         dataMatrix = dataReader.normalize(dataMatrix);
-        List<TrainingSample> trainingSet = dataReader.getTrainingSet(dataMatrix);
+
+        dataReader.splitDataSet(0.6,0.2,0.2,dataMatrix.size());
+
+        List<DataSample>trainingSet = dataReader.transformToDataSamples(dataReader.getTrainingSet(dataMatrix));
+        List<DataSample>validationSet = dataReader.transformToDataSamples(dataReader.getValidationSet(dataMatrix));
+        List<DataSample>testSet = dataReader.transformToDataSamples(dataReader.getTestSet(dataMatrix));
 
         List<Integer> layersStructure = new ArrayList<>();
 
-        layersStructure.add(mlpConfig.getInputSize());
+        int inputLayerSize = mlpConfig.getInputVectors().size();
+        int outputLayerSize = mlpConfig.getOutputVectors().size();
+
+        layersStructure.add(inputLayerSize);
         layersStructure.addAll(mlpConfig.getMlpArchitecture());
-        layersStructure.add(mlpConfig.getOutputSize());
+        layersStructure.add(outputLayerSize);
 
         ActivationFunction ac = new ActivationFunctionTanh(1);
-        WeightsInitAlgorithm wia = new WeightsInitAlgorithmRandom(-0.3, 0.3);
+        WeightsInitAlgorithm wia = new WeightsInitAlgorithmRandom(-0.1, 0.1);
 
-        int n = 100;
+        int n = 1;
         int correct = 0;
         for (int i = 0; i < n; i++) {
             System.out.print(".");

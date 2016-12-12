@@ -46,14 +46,26 @@ public class ConfigReader {
         return mlpArchitecture;
     }
 
-    public int getInputSize() throws NumberFormatException{
-        String prop = props.getProperty("inputSize");
-        return Integer.parseInt(prop);
+    public List<Integer> getInputVectors() throws NumberFormatException{
+        String prop = props.getProperty("inputVectors");
+        String [] propValues = prop.split(",");
+
+        List<Integer> inputVectors = new ArrayList<>();
+        for (int i = 0; i < propValues.length; i++) {
+            inputVectors.add(Integer.parseInt(propValues[i]) - 1);
+        }
+        return inputVectors;
     }
 
-    public int getOutputSize() throws NumberFormatException{
-        String prop = props.getProperty("outputSize");
-        return Integer.parseInt(prop);
+    public List<Integer> getOutputVectors() throws NumberFormatException{
+        String prop = props.getProperty("outputVectors");
+        String [] propValues = prop.split(",");
+
+        List<Integer> outputsVectors = new ArrayList<>();
+        for (int i = 0; i < propValues.length; i++) {
+            outputsVectors.add(Integer.parseInt(propValues[i]) - 1);
+        }
+        return outputsVectors;
     }
 
     public int getBatchSize() throws NumberFormatException{
@@ -62,12 +74,30 @@ public class ConfigReader {
         return value;
     }
 
-    public boolean initializationDebug()throws NumberFormatException{
-       return Boolean.parseBoolean(props.getProperty("initializationDebug"));
+    public double getLearningRate() throws NumberFormatException{
+        String prop = props.getProperty("learningRate");
+        Double value = Double.parseDouble(prop);
+        return value;
     }
 
-    public boolean learningIterationsDebug()throws NumberFormatException{
-        return Boolean.parseBoolean(props.getProperty("learningIterationsDebug"));
+    public String getDataSourceName(){
+        return props.getProperty("dataSourceName");
+    }
+
+    public char getCsvSeparator(){
+        return props.getProperty("csvSeparator").charAt(0);
+    }
+
+    public boolean initializationDebug()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("initializationDebug"));
+    }
+
+    public boolean learningError()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("learningError"));
+    }
+
+    public boolean validationError()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("validationError"));
     }
 
     public boolean neuronInputsDebug()throws NumberFormatException{
@@ -78,4 +108,7 @@ public class ConfigReader {
         return Boolean.parseBoolean(props.getProperty("outputsOfLearningDebug"));
     }
 
+    public boolean loadedDatasetDebug()throws NumberFormatException{
+        return Boolean.parseBoolean(props.getProperty("loadedDatasetDebug"));
+    }
 }
