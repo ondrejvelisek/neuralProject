@@ -66,9 +66,16 @@ public class MultilayerPerceptron implements NeuralNetwork {
         logger.info("-------------LEARNING-------------");
         logger.info("Learning properties:");
         logger.info("Mini batch size: " + miniBatchSize);
+        logger.info("Architecture of hidden layers: " + mlpConfig.getMlpArchitecture());
+        logger.info("Learning rate: " + mlpConfig.getLearningRate());
+        logger.info("Weights Initialized in interval: (" + mlpConfig.getWeightsInitializationMin() + ", " +
+                mlpConfig.getWeightsInitializationMax());
         logger.info("----------------------------------");
 
-        outer: while (true) {
+        int errorNotDecreased = 0;
+        Double minimalError = null;
+        int errorNotDecreasedLimit = mlpConfig.getErrorNotDecreasedLimit();
+        outer: while (errorNotDecreased < errorNotDecreasedLimit) {
             for (DataSample sample : trainingSet) {
                 miniTrainingSet.add(sample);
                 if (miniTrainingSet.size() == miniBatchSize) {
@@ -84,6 +91,17 @@ public class MultilayerPerceptron implements NeuralNetwork {
                         logger.info("Validation error (MSE):" + currentError);
                     }
 
+                    if(minimalError == null){
+                        minimalError = currentError;
+                    }
+                    else if (currentError > minimalError){
+                        errorNotDecreased++;
+                        if(errorNotDecreased >= errorNotDecreasedLimit) break;
+                    }
+                    else{
+                        minimalError = currentError;
+                        errorNotDecreased = 0;
+                    }
 
                     miniTrain(t, miniTrainingSet);
 

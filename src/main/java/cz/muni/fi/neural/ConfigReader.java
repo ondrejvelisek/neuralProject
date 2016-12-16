@@ -77,6 +77,12 @@ public class ConfigReader {
         return value;
     }
 
+    public int getErrorNotDecreasedLimit() throws NumberFormatException{
+        String prop = props.getProperty("errorNotDecreasedLimit");
+        Integer value = Integer.parseInt(prop);
+        return value;
+    }
+
     public double getLearningRate() throws NumberFormatException{
         String prop = props.getProperty("learningRate");
         Double value = Double.parseDouble(prop);
