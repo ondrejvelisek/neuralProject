@@ -11,7 +11,7 @@ public interface NeuralNetwork {
 
 	List<Double> computeOutput(List<Double> input);
 
-	void train(List<DataSample> trainingSet, List<DataSample> validationSet);
+	void train(List<DataSample> trainingSet, List<DataSample> validationSet, double errorLimit, long iterationsLimit);
 
 	int getInputSize();
 

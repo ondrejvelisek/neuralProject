@@ -41,6 +41,9 @@ public class ConfigReader {
 
         List<Integer> mlpArchitecture = new ArrayList<>();
         for(int i=0; i < propValues.length; i++){
+			if (propValues[i].isEmpty()) {
+				continue;
+			}
             mlpArchitecture.add(Integer.parseInt(propValues[i]));
         }
         return mlpArchitecture;
@@ -83,6 +86,25 @@ public class ConfigReader {
     public String getDataSourceName(){
         return props.getProperty("dataSourceName");
     }
+
+    public double getWeightsInitializationMin(){
+        String prop = props.getProperty("weightsInitializationInterval").split(",")[0];
+        Double value = Double.parseDouble(prop);
+        return value;
+    }
+    public double getWeightsInitializationMax(){
+        String prop = props.getProperty("weightsInitializationInterval").split(",")[1];
+        Double value = Double.parseDouble(prop);
+        return value;
+    }
+
+	public double getErrorLimit(){
+		return Double.parseDouble(props.getProperty("errorLimit"));
+	}
+
+	public long getIterationsLimit(){
+		return Long.parseLong(props.getProperty("iterationsLimit"));
+	}
 
     public char getCsvSeparator(){
         return props.getProperty("csvSeparator").charAt(0);

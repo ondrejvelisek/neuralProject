@@ -28,9 +28,8 @@ public class DataReader {
     }
 
     public List<List<Double>> csvToMatrix() throws IOException {
-        ConfigReader mlpConfig = ConfigReader.getInstance();
         String [] nextLine;
-        List<List<Double>> matrix = new ArrayList<List<Double>>();
+        List<List<Double>> matrix = new ArrayList<>();
         while ((nextLine = reader.readNext()) != null) {
             List<Double> exampleValues = new ArrayList<>();
             boolean lineError = false;

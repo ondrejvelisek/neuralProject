@@ -69,38 +69,27 @@ public class Main {
         layersStructure.add(outputLayerSize);
 
         ActivationFunction ac = new ActivationFunctionTanh(1);
-        WeightsInitAlgorithm wia = new WeightsInitAlgorithmRandom(-0.1, 0.1);
+        WeightsInitAlgorithm wia = new WeightsInitAlgorithmRandom(
+                mlpConfig.getWeightsInitializationMin(),
+                mlpConfig.getWeightsInitializationMax()
+        );
 
-        NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
+		double learningRate = mlpConfig.getLearningRate();
+		double errorLimit = mlpConfig.getErrorLimit();
+		long iterationsLimit = mlpConfig.getIterationsLimit();
 
-        net.train(trainingSet, validationSet);
-        logger.info("Test error (MSE):" + net.error(testSet));
-
-//        int n = 100;
-//        int correct = 0;
+//        int n = 10;
 //        for (int i = 0; i < n; i++) {
-//            System.out.print(".");
+
+			NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia, learningRate);
+
+			logger.info("Test init error (MSE):" + net.error(testSet));
+			net.train(trainingSet, validationSet, errorLimit, iterationsLimit);
+			logger.info("Test error (MSE):" + net.error(testSet));
+
 //        }
-//        System.out.println();
-//        for (int i = 0; i < n; i++) {
-//
-//            NeuralNetwork net = new MultilayerPerceptron(layersStructure, ac, wia);
-//
-//            double origErr = net.error(trainingSet);
-//
-//            net.train(trainingSet, validationSet);
-//
-//            double trainedError = net.error(trainingSet);
-//            if (trainedError < origErr/10) {
-//                correct++;
-//            }
-//            System.out.print("|");
-//        }
-//        System.out.println();
-//        System.out.println("Total experiments: " + n);
-//        System.out.println("Successful experiments: " + correct);
-//
-//
+
+
        }
 
 }

@@ -15,12 +15,13 @@ public class MultilayerPerceptron implements NeuralNetwork {
     public static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private List<Layer> layers;
+	private double learningRate;
 
-    public MultilayerPerceptron(List<Integer> layersStructure, ActivationFunction ac, WeightsInitAlgorithm wia) {
-        if (layersStructure.size() < 3) {
+    public MultilayerPerceptron(List<Integer> layersStructure, ActivationFunction ac, WeightsInitAlgorithm wia, double learningRate) {
+        if (layersStructure.size() < 2) {
             throw new IllegalArgumentException("At least one hidden layer have to be present in MPL.");
         }
-
+		this.learningRate = learningRate;
         layers = new ArrayList<>();
         for (int i = 1; i < layersStructure.size(); i++) {
 //			if(i == (layersStructure.size()-1)){
@@ -55,7 +56,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
     }
 
     @Override
-    public void train(List<DataSample> trainingSet, List<DataSample> validationSet) {
+    public void train(List<DataSample> trainingSet, List<DataSample> validationSet, double errorLimit, long iterationsLimit) {
 
         ConfigReader mlpConfig = ConfigReader.getInstance();
         int miniBatchSize = mlpConfig.getBatchSize();
@@ -67,10 +68,7 @@ public class MultilayerPerceptron implements NeuralNetwork {
         logger.info("Mini batch size: " + miniBatchSize);
         logger.info("----------------------------------");
 
-        int errorNotDecreased = 0;
-        Double minimalError = null;
-        int stoppingLimit = 50;
-        while (errorNotDecreased < stoppingLimit) {
+        outer: while (true) {
             for (DataSample sample : trainingSet) {
                 miniTrainingSet.add(sample);
                 if (miniTrainingSet.size() == miniBatchSize) {
@@ -86,17 +84,6 @@ public class MultilayerPerceptron implements NeuralNetwork {
                         logger.info("Validation error (MSE):" + currentError);
                     }
 
-					if(minimalError == null){
-						minimalError = currentError;
-					}
-					else if (currentError > minimalError){
-						errorNotDecreased++;
-						if(errorNotDecreased >= stoppingLimit) break;
-					}
-					else{
-						minimalError = currentError;
-						errorNotDecreased = 0;
-					}
 
                     miniTrain(t, miniTrainingSet);
 
@@ -105,6 +92,13 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
                     if (mlpConfig.learningError() || mlpConfig.validationError() || mlpConfig.outputsOfLearningDebug())
                         logger.info("------------------------");
+
+					if (t > iterationsLimit) {
+						break outer;
+					}
+					if (currentError < errorLimit) {
+						break outer;
+					}
                 }
             }
         }
@@ -121,8 +115,8 @@ public class MultilayerPerceptron implements NeuralNetwork {
 
     private double learningRate(int time) {
 
-        //return 0.5/(time/5+1);
-        return 0.1;
+        //return 0.05*(time/20.0 +1);
+        return learningRate;
     }
 
     /**
